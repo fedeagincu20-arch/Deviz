@@ -107,15 +107,15 @@ body{
 .clause-label{font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 
 /* ── PRICE GRID ──────────────────────────────────────── */
-.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pi{background:var(--g1);border:1px solid var(--g3);border-radius:var(--radius-sm);padding:8px 10px}
-.pi-lbl{font-size:10px;color:var(--g5);font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;line-height:1.3}
+.pg{display:grid;grid-template-columns:1fr;gap:8px}
+.pi{background:var(--g1);border:1px solid var(--g3);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pi-lbl{font-size:13px;color:var(--text);font-weight:500;flex:1}
 .pi-row{display:flex;align-items:center;gap:5px}
 .pi-inp{
-  flex:1;padding:6px 8px;text-align:right;
+  width:90px;padding:8px 10px;text-align:right;
   border:1.5px solid var(--g3);border-radius:6px;
-  font-size:14px;font-weight:700;color:var(--navy);
-  -webkit-appearance:none;
+  font-size:15px;font-weight:700;color:var(--navy);
+  -webkit-appearance:none;flex-shrink:0;
 }
 .pi-inp:focus{outline:none;border-color:var(--yellow)}
 .pi-eur{font-size:12px;color:var(--g5);font-weight:600}
@@ -156,29 +156,30 @@ body{
 }
 .btn-del:active{background:var(--red);color:#fff}
 .rcb{padding:10px;background:var(--g1)}
-.ig{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ig{display:grid;grid-template-columns:1fr;gap:7px}
 .ic{
   background:#fff;border:1.5px solid var(--g3);border-radius:var(--radius-sm);
   padding:8px 10px;transition:border-color .15s;
+  display:flex;align-items:center;gap:8px;
 }
 .ic.active{border-color:var(--yellow);background:#fffbf0}
-.ic-lbl{font-size:10px;color:var(--g5);font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;line-height:1.3}
-.qr{display:flex;align-items:center;gap:6px}
+.ic-lbl{font-size:12px;color:var(--text);font-weight:500;flex:1;margin-bottom:0;line-height:1.2;min-width:0;word-break:break-word}
+.qr{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .qb{
-  width:32px;height:32px;background:var(--navy);color:#fff;
-  border:none;border-radius:6px;font-size:18px;font-weight:700;
+  width:28px;height:28px;background:var(--navy);color:#fff;
+  border:none;border-radius:5px;font-size:16px;font-weight:700;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;-webkit-tap-highlight-color:transparent;
   user-select:none;-webkit-user-select:none;
 }
 .qb:active{background:var(--yellow);color:var(--navy);transform:scale(.93)}
 .qi{
-  flex:1;text-align:center;border:1.5px solid var(--g3);border-radius:6px;
-  font-size:16px;font-weight:700;padding:4px 2px;color:var(--navy);
-  -webkit-appearance:none;min-width:0;
+  width:40px;text-align:center;border:1.5px solid var(--g3);border-radius:5px;
+  font-size:14px;font-weight:700;padding:3px 2px;color:var(--navy);
+  -webkit-appearance:none;
 }
 .qi:focus{outline:none;border-color:var(--yellow)}
-.is{font-size:10px;color:var(--green);font-weight:700;margin-top:4px}
+.is{font-size:11px;color:var(--green);font-weight:700;white-space:nowrap;min-width:52px;text-align:right;flex-shrink:0}
 .rni{
   width:100%;border:none;background:transparent;
   font-size:12px;color:var(--g5);padding:8px 12px;
@@ -282,8 +283,7 @@ body{
 }
 
 @media(min-width:600px){
-  .ig{grid-template-columns:1fr 1fr 1fr}
-  .pg{grid-template-columns:1fr 1fr 1fr}
+  .pg{grid-template-columns:1fr}
   .input-grid{grid-template-columns:1fr 1fr 1fr}
 }
 
@@ -947,7 +947,8 @@ function makePDF(){
   doc.rect(ML,y+2,colW,28);
   fillRect(ML,y+2,colW,6,navy);
   setFont(7,'bold',yellow);
-  text('🏢 '+t.firm_card.replace('🏢 ',''),ML+3,y+6.5);
+  const firmCardLabel = lang==='nl'?'BEDRIJF':lang==='fr'?'ENTREPRISE':'FIRMA';
+  text(firmCardLabel, ML+3, y+6.5);
   setFont(9,'bold',textCol);
   text(firmNume,ML+3,y+14);
   setFont(8,'normal',gray5);
@@ -960,7 +961,8 @@ function makePDF(){
   doc.rect(cx,y+2,colW,28);
   fillRect(cx,y+2,colW,6,navy);
   setFont(7,'bold',yellow);
-  text('👤 '+t.client_card.replace('👤 ',''),cx+3,y+6.5);
+  const clientCardLabel = lang==='nl'?'KLANT':lang==='fr'?'CLIENT':'CLIENT';
+  text(clientCardLabel, cx+3, y+6.5);
   setFont(9,'bold',textCol);
   text(clientNume,cx+3,y+14);
   setFont(8,'normal',gray5);
@@ -981,43 +983,79 @@ function makePDF(){
   lineH(y+8,yellow,0.8);
   y+=10;
 
-  let rowBg=false;
+  // Show ALL rooms, ALL items — client sees everything
   rooms.forEach(room=>{
-    const rt=calcRoom(room);
-    if(rt===0) return;
-
-    // check page break
     if(y>H-60){ doc.addPage(); y=15; }
 
-    // room header
-    fillRect(ML,y,W-ML-MR,7,navy);
+    // Room header bar
+    fillRect(ML,y,W-ML-MR,8,navy);
+    setFont(10,'bold',yellow);
+    text(room.name.toUpperCase(), ML+4, y+5.8);
+    const rt=calcRoom(room);
     setFont(9,'bold',yellow);
-    text(room.emoji+' '+room.name,ML+3,y+5);
-    y+=8;
+    text(fmt(rt)+' EUR', W-MR-2, y+5.8, {align:'right'});
+    y+=9;
 
+    // Column sub-header
+    fillRect(ML,y,W-ML-MR,5.5,[235,238,242]);
+    setFont(7,'bold',gray5);
+    text(t.item_desc, ML+3, y+4);
+    text(t.item_qty, W-MR-52, y+4, {align:'right'});
+    text(t.item_up, W-MR-28, y+4, {align:'right'});
+    text(t.item_tot, W-MR-2, y+4, {align:'right'});
+    y+=6;
+
+    let rowBg=false;
     ITEMS.forEach(item=>{
       const q=room.items[item.k]||0;
-      if(!q) return;
-      if(y>H-30){ doc.addPage(); y=15; }
+      if(y>H-25){ doc.addPage(); y=15; }
+
       const sub=q*prices[item.k];
-      fillRect(ML,y,W-ML-MR,6.5,rowBg?[245,247,250]:white);
-      setFont(8,'normal',textCol);
-      text(T[lang][item.k]||item.k,ML+3,y+4.5);
-      text(String(q),W-MR-52,y+4.5,{align:'right'});
-      setFont(8,'normal',gray5);
-      text(fmt(prices[item.k])+' €',W-MR-28,y+4.5,{align:'right'});
-      setFont(8,'bold',textCol);
-      text(fmt(sub)+' €',W-MR-2,y+4.5,{align:'right'});
-      lineH(y+6.5,[225,230,235],0.2);
+      const bg=rowBg?[248,249,252]:white;
+      fillRect(ML,y,W-ML-MR,6.5,bg);
+
+      // item name
+      setFont(8,'normal',q>0?textCol:gray5);
+      const itemName=T[lang][item.k]||item.k;
+      text(itemName, ML+3, y+4.5);
+
+      // qty — highlight if >0
+      if(q>0){
+        fillRect(W-MR-58,y+0.5,14,5.5,[245,158,11]);
+        setFont(8,'bold',white);
+        text(String(q), W-MR-52, y+4.5, {align:'right'});
+      } else {
+        setFont(8,'normal',[200,205,210]);
+        text('0', W-MR-52, y+4.5, {align:'right'});
+      }
+
+      // unit price
+      setFont(8,'normal',q>0?gray5:[210,215,220]);
+      text(fmt(prices[item.k])+' EUR', W-MR-28, y+4.5, {align:'right'});
+
+      // subtotal
+      setFont(8, q>0?'bold':'normal', q>0?textCol:[210,215,220]);
+      text(q>0?fmt(sub)+' EUR':'—', W-MR-2, y+4.5, {align:'right'});
+
+      doc.setDrawColor(225,230,235); doc.setLineWidth(0.15);
+      doc.line(ML,y+6.5,W-MR,y+6.5);
       y+=7; rowBg=!rowBg;
     });
 
+    // Room subtotal row
+    fillRect(ML,y,W-ML-MR,7,[230,235,240]);
+    setFont(8,'bold',navy);
+    const subtotLabel=lang==='nl'?'Subtotaal kamer:':lang==='fr'?'Sous-total pièce:':'Subtotal camera:';
+    text(subtotLabel, ML+3, y+5);
+    text(fmt(rt)+' EUR', W-MR-2, y+5, {align:'right'});
+    y+=8;
+
     if(room.note){
       setFont(7.5,'italic',gray5);
-      text('📝 '+room.note,ML+3,y+4);
+      text('Nota: '+room.note, ML+3, y+4);
       y+=6;
     }
-    y+=2;
+    y+=4;
   });
 
   // ── TOTALS ────────────────────────────────────────────────
