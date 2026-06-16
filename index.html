@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Deviz ⚡">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>Deviz Electric Pro ⚡</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#0a1628;--navy2:#1e3a5f;--navy3:#2d5080;
+  --yellow:#F59E0B;--yellow2:#FCD34D;
+  --green:#10B981;--red:#EF4444;--blue:#3B82F6;
+  --g1:#f4f6f9;--g2:#e8ecf0;--g3:#d0d7e0;--g4:#9aa5b4;--g5:#5a6578;
+  --white:#fff;--text:#0f1923;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  --tab-h:64px;
+}
+html{height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--g1);color:var(--text);
+  height:100%;display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────── */
+.topbar{
+  background:var(--navy);
+  padding:env(safe-area-inset-top,0) 0 0;
+  flex-shrink:0;
+  border-bottom:2.5px solid var(--yellow);
+  z-index:100;
+}
+.topbar-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+}
+.topbar-logo{display:flex;align-items:center;gap:8px}
+.topbar-icon{font-size:20px;filter:drop-shadow(0 0 6px var(--yellow))}
+.topbar-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.topbar-sub{font-size:10px;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:6px}
+.lang-btn{
+  padding:5px 9px;border:1.5px solid rgba(255,255,255,.2);
+  background:transparent;color:#fff;border-radius:6px;
+  font-size:11px;font-weight:700;cursor:pointer;transition:.15s;
+  letter-spacing:.04em;
+}
+.lang-btn.active{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+.tva-sel{
+  background:var(--navy2);color:var(--yellow);
+  border:1px solid var(--yellow);padding:5px 8px;border-radius:6px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  -webkit-appearance:none;
+}
+
+/* ── SCROLL AREA ─────────────────────────────────────── */
+.scroll-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:12px 12px calc(var(--tab-h) + env(safe-area-inset-bottom,0) + 12px);
+}
+
+/* ── CARDS ───────────────────────────────────────────── */
+.card{
+  background:var(--white);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;
+}
+.card-head{
+  background:var(--navy);padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid var(--yellow);
+}
+.card-title{font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase}
+.card-badge{font-size:11px;color:var(--yellow);font-weight:700}
+.card-body{padding:14px}
+
+/* ── FORM INPUTS ─────────────────────────────────────── */
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.input-group{display:flex;flex-direction:column;gap:4px}
+.input-group.full{grid-column:1/-1}
+.input-label{font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.04em}
+.inp{
+  width:100%;padding:10px 12px;
+  border:1.5px solid var(--g3);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--text);background:#fff;
+  -webkit-appearance:none;
+  transition:border-color .15s;
+}
+.inp:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.inp::placeholder{color:var(--g4)}
+.textarea{resize:vertical;min-height:52px;font-size:13px;line-height:1.4}
+.clause-box{
+  margin-top:10px;padding:10px 12px;
+  background:#FEF9C3;border-radius:var(--radius-sm);
+  border-left:3px solid var(--yellow);
+}
+.clause-label{font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+
+/* ── PRICE GRID ──────────────────────────────────────── */
+.pg{display:grid;grid-template-columns:1fr;gap:8px}
+.pi{background:var(--g1);border:1px solid var(--g3);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pi-lbl{font-size:13px;color:var(--text);font-weight:500;flex:1}
+.pi-row{display:flex;align-items:center;gap:5px}
+.pi-inp{
+  width:90px;padding:8px 10px;text-align:right;
+  border:1.5px solid var(--g3);border-radius:6px;
+  font-size:15px;font-weight:700;color:var(--navy);
+  -webkit-appearance:none;flex-shrink:0;
+}
+.pi-inp:focus{outline:none;border-color:var(--yellow)}
+.pi-eur{font-size:12px;color:var(--g5);font-weight:600}
+
+/* ── ADD ROOM ────────────────────────────────────────── */
+.add-row{display:flex;gap:8px;align-items:stretch;margin-bottom:14px}
+.room-sel{
+  padding:10px 8px;border:1.5px solid var(--g3);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--text);background:#fff;
+  -webkit-appearance:none;flex-shrink:0;
+}
+.room-inp{
+  flex:1;padding:10px 12px;border:1.5px solid var(--g3);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--text);-webkit-appearance:none;
+}
+.room-inp:focus,.room-sel:focus{outline:none;border-color:var(--yellow)}
+.btn-add{
+  padding:10px 14px;background:var(--yellow);color:var(--navy);
+  border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+  active-color:var(--yellow2);
+}
+.btn-add:active{background:var(--yellow2);transform:scale(.97)}
+
+/* ── ROOM CARDS ──────────────────────────────────────── */
+.rooms-list{display:flex;flex-direction:column;gap:10px}
+.rc{border:1.5px solid var(--g3);border-radius:var(--radius);overflow:hidden;background:#fff}
+.rch{
+  background:var(--navy2);padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.rcn{font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+.rct{font-size:13px;font-weight:700;color:var(--yellow);margin-right:6px}
+.btn-del{
+  background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);
+  border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;
+}
+.btn-del:active{background:var(--red);color:#fff}
+.rcb{padding:10px;background:var(--g1)}
+.ig{display:grid;grid-template-columns:1fr;gap:7px}
+.ic{
+  background:#fff;border:1.5px solid var(--g3);border-radius:var(--radius-sm);
+  padding:8px 10px;transition:border-color .15s;
+  display:flex;align-items:center;gap:8px;
+}
+.ic.active{border-color:var(--yellow);background:#fffbf0}
+.ic-lbl{font-size:12px;color:var(--text);font-weight:500;flex:1;margin-bottom:0;line-height:1.2;min-width:0;word-break:break-word}
+.qr{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.qb{
+  width:28px;height:28px;background:var(--navy);color:#fff;
+  border:none;border-radius:5px;font-size:16px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;-webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+.qb:active{background:var(--yellow);color:var(--navy);transform:scale(.93)}
+.qi{
+  width:40px;text-align:center;border:1.5px solid var(--g3);border-radius:5px;
+  font-size:14px;font-weight:700;padding:3px 2px;color:var(--navy);
+  -webkit-appearance:none;
+}
+.qi:focus{outline:none;border-color:var(--yellow)}
+.is{font-size:11px;color:var(--green);font-weight:700;white-space:nowrap;min-width:52px;text-align:right;flex-shrink:0}
+.rni{
+  width:100%;border:none;background:transparent;
+  font-size:12px;color:var(--g5);padding:8px 12px;
+  border-top:1px solid var(--g3);font-style:italic;
+}
+.rni:focus{outline:none;color:var(--text)}
+.rni::placeholder{color:var(--g4)}
+
+/* ── SUMMARY ─────────────────────────────────────────── */
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--g2)}
+.sum-row:last-child{border-bottom:none}
+.sum-name{font-size:13px;display:flex;align-items:center;gap:5px}
+.sum-amt{font-size:13px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.divider{height:1px;background:var(--g3);margin:8px 0}
+.tot-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.tot-lbl{font-size:12px;color:var(--g5)}
+.tot-val{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.tot-row.tva .tot-val{color:var(--red)}
+.tot-row.big{padding-top:10px;border-top:2px solid var(--navy);margin-top:6px}
+.tot-row.big .tot-lbl{font-size:14px;font-weight:700;color:var(--navy)}
+.tot-row.big .tot-val{font-size:22px;font-weight:800;color:var(--navy)}
+.mano-section{margin-top:12px}
+.mano-lbl{font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.mano-row{display:flex;align-items:center;gap:6px}
+.mano-inp{
+  flex:1;padding:10px 12px;border:1.5px solid var(--g3);border-radius:var(--radius-sm);
+  font-size:16px;font-weight:700;text-align:right;color:var(--navy);
+  -webkit-appearance:none;
+}
+.mano-inp:focus{outline:none;border-color:var(--yellow)}
+
+/* ── PDF BUTTON ──────────────────────────────────────── */
+.pdf-btn{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--yellow),#e68e00);
+  color:var(--navy);border:none;border-radius:var(--radius);
+  font-size:15px;font-weight:800;cursor:pointer;
+  letter-spacing:.02em;margin-bottom:10px;
+  box-shadow:0 4px 15px rgba(245,158,11,.35);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.pdf-btn:active{transform:scale(.97);box-shadow:none}
+.reset-btn{
+  width:100%;padding:12px;
+  background:transparent;color:var(--red);
+  border:1.5px solid rgba(239,68,68,.3);border-radius:var(--radius);
+  font-size:13px;font-weight:700;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.reset-btn:active{background:rgba(239,68,68,.08)}
+
+/* ── TABS ────────────────────────────────────────────── */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--tab-h);
+  background:var(--white);
+  border-top:1px solid var(--g3);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom,0);
+  z-index:100;
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;cursor:pointer;
+  border:none;background:transparent;
+  color:var(--g4);transition:.15s;
+  -webkit-tap-highlight-color:transparent;
+  padding-top:4px;
+}
+.tab.active{color:var(--yellow)}
+.tab-icon{font-size:22px;line-height:1}
+.tab-label{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── PAGES ───────────────────────────────────────────── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── EMPTY ───────────────────────────────────────────── */
+.empty{text-align:center;padding:32px 16px;color:var(--g4)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-txt{font-size:14px}
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:var(--navy);color:#fff;padding:10px 20px;border-radius:20px;
+  font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:999;
+  white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25);
+  border:1px solid var(--yellow);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SECTION HEADER ──────────────────────────────────── */
+.section-h{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 0 10px;font-size:11px;font-weight:700;
+  color:var(--navy2);text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:2px solid var(--yellow);margin-bottom:10px;
+}
+
+@media(min-width:600px){
+  .pg{grid-template-columns:1fr}
+  .input-grid{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* ── PDF MODAL ───────────────────────────────────────────── */
+#pdfModal{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:flex-end;justify-content:center;
+  transition:opacity .3s;
+}
+.pm-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(4px);
+}
+.pm-box{
+  position:relative;z-index:1;
+  width:100%;max-width:480px;
+  background:#fff;
+  border-radius:20px 20px 0 0;
+  overflow:hidden;
+  box-shadow:0 -8px 40px rgba(0,0,0,.3);
+  animation:slideUp .35s cubic-bezier(.16,1,.3,1);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.pm-head{
+  background:var(--navy);
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid var(--yellow);
+}
+.pm-title{font-size:16px;font-weight:700;color:#fff}
+.pm-close{
+  background:rgba(255,255,255,.1);border:none;color:#fff;
+  width:32px;height:32px;border-radius:50%;font-size:16px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.pm-close:active{background:rgba(255,255,255,.25)}
+.pm-body{
+  padding:24px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0));
+}
+.pm-icon{font-size:48px;line-height:1}
+.pm-msg{font-size:16px;font-weight:600;color:var(--text);text-align:center}
+.pm-fname{
+  font-size:11px;color:var(--g5);
+  background:var(--g1);padding:6px 12px;border-radius:6px;
+  word-break:break-all;text-align:center;max-width:100%;
+  border:1px solid var(--g3);font-family:monospace;
+}
+.pm-btn{
+  width:100%;padding:14px;border-radius:10px;
+  font-size:14px;font-weight:700;cursor:pointer;
+  text-align:center;text-decoration:none;display:block;
+  border:none;transition:.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.pm-btn:active{transform:scale(.97)}
+.pm-btn-primary{
+  background:linear-gradient(135deg,var(--yellow),#e68e00);
+  color:var(--navy);
+  box-shadow:0 4px 15px rgba(245,158,11,.3);
+}
+.pm-btn-secondary{
+  background:var(--navy);color:#fff;
+  box-shadow:0 4px 15px rgba(10,22,40,.2);
+}
+.pm-btn-ghost{
+  background:transparent;color:var(--g5);
+  border:1.5px solid var(--g3);
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-logo">
+      <span class="topbar-icon">⚡</span>
+      <div>
+        <div class="topbar-title">Deviz Electric Pro</div>
+        <div class="topbar-sub">Belgia</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-btn active" onclick="setLang('ro')">RO</button>
+      <button class="lang-btn" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" onclick="setLang('nl')">NL</button>
+      <select class="tva-sel" id="tvaSelect" onchange="recalc()">
+        <option value="0.06">6%</option>
+        <option value="0.21" selected>21%</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- PAGE: FIRMA/CLIENT -->
+  <div class="page active" id="page-firm">
+    <div class="card">
+      <div class="card-head"><span class="card-title" data-t="firm_card">🏢 Firma</span></div>
+      <div class="card-body">
+        <div class="input-grid">
+          <div class="input-group full"><div class="input-label" data-t="l_fnume">Numele firmei</div><input class="inp" id="firmNume" data-ph="p_fnume" placeholder="Numele firmei"></div>
+          <div class="input-group"><div class="input-label" data-t="l_ftva">Nr. TVA</div><input class="inp" id="firmTva" data-ph="p_ftva" placeholder="BE 0000.000.000"></div>
+          <div class="input-group"><div class="input-label" data-t="l_ftel">Telefon</div><input class="inp" id="firmTel" type="tel" placeholder="+32 ..."></div>
+          <div class="input-group full"><div class="input-label" data-t="l_faddr">Adresa</div><input class="inp" id="firmAddr" data-ph="p_faddr" placeholder="Strada, nr, localitate"></div>
+          <div class="input-group full"><div class="input-label">Email</div><input class="inp" id="firmEmail" type="email" placeholder="email@firma.be"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-title" data-t="client_card">👤 Client</span></div>
+      <div class="card-body">
+        <div class="input-grid">
+          <div class="input-group full"><div class="input-label" data-t="l_cnume">Numele clientului</div><input class="inp" id="clientNume" data-ph="p_cnume" placeholder="Numele clientului"></div>
+          <div class="input-group full"><div class="input-label" data-t="l_caddr">Adresa lucrare</div><input class="inp" id="clientAddr" data-ph="p_caddr" placeholder="Adresa santierului"></div>
+          <div class="input-group"><div class="input-label" data-t="l_ctel">Telefon</div><input class="inp" id="clientTel" type="tel" placeholder="+32 ..."></div>
+          <div class="input-group"><div class="input-label" data-t="l_devnr">Nr. deviz</div><input class="inp" id="devizNr" placeholder="2024-001"></div>
+        </div>
+        <div class="clause-box" style="margin-top:10px">
+          <div class="clause-label" data-t="clause_lbl">Clauza lucrari suplimentare</div>
+          <textarea class="inp textarea" id="clausaText" data-ph="p_clauza"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: PRETURI -->
+  <div class="page" id="page-prices">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title" data-t="prices_title">Preturi unitare € excl. TVA</span>
+        <span class="card-badge" data-t="editable">editabile</span>
+      </div>
+      <div class="card-body">
+        <div class="pg" id="priceGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: CAMERE -->
+  <div class="page" id="page-rooms">
+    <div class="add-row">
+      <select class="room-sel" id="roomTypeSelect">
+        <option value="🛋️">🛋️</option>
+        <option value="🛏️">🛏️</option>
+        <option value="🍳">🍳</option>
+        <option value="🚿">🚿</option>
+        <option value="🚽">🚽</option>
+        <option value="🚪">🚪</option>
+        <option value="🧱">🧱</option>
+        <option value="🚗">🚗</option>
+        <option value="🌿">🌿</option>
+        <option value="📦">📦</option>
+        <option value="⚡">⚡</option>
+      </select>
+      <input class="room-inp" id="roomInp" data-ph="room_ph" placeholder="Numele camerei..."
+        onkeydown="if(event.key==='Enter'){addRoom();this.blur()}">
+      <button class="btn-add" onclick="addRoom()" data-t="add_btn">+ Add</button>
+    </div>
+    <div class="rooms-list" id="roomsList">
+      <div class="empty"><div class="empty-icon">🏗️</div><div class="empty-txt" data-t="empty_txt">Adauga prima camera</div></div>
+    </div>
+  </div>
+
+  <!-- PAGE: SUMAR + PDF -->
+  <div class="page" id="page-sum">
+    <div class="card">
+      <div class="card-head"><span class="card-title" data-t="sum_title">Sumar deviz</span><span class="card-badge" id="sumDate"></span></div>
+      <div class="card-body">
+        <div id="sumRows"><div style="text-align:center;color:var(--g4);padding:16px;font-size:13px" data-t="no_rooms">Nicio camera</div></div>
+        <div class="mano-section">
+          <div class="mano-lbl" data-t="labor_lbl">🔧 Manopera (€ excl. TVA)</div>
+          <div class="mano-row">
+            <input type="number" class="mano-inp" id="manopera" value="0" min="0" step="50" oninput="recalc()">
+            <span style="font-size:14px;color:var(--g5);font-weight:700">€</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="tot-row"><span class="tot-lbl" data-t="t_mat">Materiale</span><span class="tot-val" id="tMat">0,00 €</span></div>
+        <div class="tot-row"><span class="tot-lbl" data-t="t_man">Manopera</span><span class="tot-val" id="tMan">0,00 €</span></div>
+        <div class="tot-row"><span class="tot-lbl" data-t="t_htva">Subtotal HTVA</span><span class="tot-val" id="tHTVA">0,00 €</span></div>
+        <div class="tot-row tva"><span class="tot-lbl" id="tvaLbl">TVA 21%</span><span class="tot-val" id="tTVA" style="color:var(--red)">0,00 €</span></div>
+        <div class="tot-row big"><span class="tot-lbl" data-t="t_total">TOTAL TVAC</span><span class="tot-val" id="tTotal">0,00 €</span></div>
+      </div>
+    </div>
+    <button class="pdf-btn" onclick="makePDF()">
+      <span>📄</span><span data-t="pdf_btn">Genereaza PDF</span>
+    </button>
+    <button class="reset-btn" onclick="resetAll()" data-t="reset_btn">🗑️ Sterge tot devizul</button>
+  </div>
+
+</div><!-- /scroll-area -->
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab active" onclick="goTab(0)" id="tab0">
+    <span class="tab-icon">🏢</span>
+    <span class="tab-label" data-t="tab_firm">Firma</span>
+  </button>
+  <button class="tab" onclick="goTab(1)" id="tab1">
+    <span class="tab-icon">💰</span>
+    <span class="tab-label" data-t="tab_prices">Preturi</span>
+  </button>
+  <button class="tab" onclick="goTab(2)" id="tab2">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label" data-t="tab_rooms">Camere</span>
+  </button>
+  <button class="tab" onclick="goTab(3)" id="tab3">
+    <span class="tab-icon">📋</span>
+    <span class="tab-label" data-t="tab_sum">Deviz</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════════════
+const T={
+ro:{
+  firm_card:"🏢 Firma",client_card:"👤 Client",
+  l_fnume:"Numele firmei",l_ftva:"Nr. TVA / BTW",l_ftel:"Telefon",l_faddr:"Adresa firma",
+  l_cnume:"Numele clientului",l_caddr:"Adresa lucrare",l_ctel:"Telefon",l_devnr:"Nr. deviz",
+  clause_lbl:"Clauza lucrari suplimentare",
+  p_fnume:"Numele firmei",p_ftva:"BE 0000.000.000",p_faddr:"Strada, nr, localitate",
+  p_cnume:"Numele clientului",p_caddr:"Adresa santierului",
+  p_clauza:"Orice lucrare suplimentara neprevazuta va fi facturata separat, cu acordul prealabil al clientului.",
+  prices_title:"Preturi unitare € excl. TVA",editable:"editabile",
+  add_btn:"+ Add",room_ph:"Numele camerei...",
+  empty_txt:"Adauga prima camera pentru a incepe",
+  sum_title:"Sumar deviz",no_rooms:"Nicio camera adaugata",
+  labor_lbl:"🔧 Manopera (€ excl. TVA)",
+  t_mat:"Materiale",t_man:"Manopera",t_htva:"Subtotal HTVA",t_total:"TOTAL TVAC",
+  pdf_btn:"Genereaza PDF",reset_btn:"🗑️ Sterge tot devizul",
+  tab_firm:"Firma",tab_prices:"Preturi",tab_rooms:"Camere",tab_sum:"Deviz",
+  note_ph:"Nota (circuit separat, IP44...)",
+  offer_lbl:"OFERTA / DEVIZ",item_desc:"Descriere",item_qty:"Buc",item_up:"Pret unit.",item_tot:"Total",
+  sig_firm:"Semnatura Firma",sig_client:"Semnatura Client",sig_date:"Data",
+  sig_agree:"Prin semnarea prezentului deviz, clientul accepta conditiile de mai sus.",
+  clause_title:"Clauza lucrari suplimentare",
+  // items
+  priza1:"Priza simpla",priza2:"Priza dubla",priza3:"Priza tripla",priza4:"Priza cu 4",
+  prizaIP:"Priza IP44 ext/baie",
+  plitaMono:"Priza plita 1F",plitaTri3N:"Priza plita 3F+N+PE",plitaTri3:"Priza plita 3F+PE",
+  int1:"Intrerupator simplu",int2:"Intrerupator dublu",
+  intVV1:"Va-et-vient simplu",intVV2:"Va-et-vient dublu",intBip:"Intrerupator bipolar",
+  variator:"Variator lumina",
+  lampa:"Punct lumina",spot:"Spot incastrat",corpi:"Corp baie IP44",
+  detector:"Detector fum",detectorCO:"Detector CO",baes:"BAES urgenta",
+  tablou:"Tablou electric",disjunctor:"Disjunctor (buc)",diferential:"Diferential 30mA",
+  cablVVB15:"Cablu VVB 1.5mm (m)",cablVVB25:"Cablu VVB 2.5mm (m)",cablVVB6:"Cablu VVB 6mm (m)",
+  cablXGSOH:"Cablu XGSOH FE180 (m)",tub16:"Tub IRL 16mm (m)",tub20:"Tub IRL 20mm (m)",
+  tub25:"Tub IRL 25mm (m)",doza:"Doza derivatie",
+  r0:"🛋️ Living",r1:"🛏️ Dormitor",r2:"🍳 Bucatarie",r3:"🚿 Baie",r4:"🚽 WC",
+  r5:"🚪 Hol",r6:"🧱 Casa scarii",r7:"🚗 Garaj",r8:"🌿 Terasa",r9:"📦 Depozit",r10:"⚡ Tablou",
+},
+fr:{
+  firm_card:"🏢 Entreprise",client_card:"👤 Client",
+  l_fnume:"Nom entreprise",l_ftva:"N° TVA",l_ftel:"Téléphone",l_faddr:"Adresse",
+  l_cnume:"Nom du client",l_caddr:"Adresse chantier",l_ctel:"Téléphone",l_devnr:"N° devis",
+  clause_lbl:"Clause travaux supplémentaires",
+  p_fnume:"Nom de l'entreprise",p_ftva:"BE 0000.000.000",p_faddr:"Rue, n°, localité",
+  p_cnume:"Nom du client",p_caddr:"Adresse du chantier",
+  p_clauza:"Tout travail supplémentaire non prévu sera facturé séparément, avec accord préalable du client.",
+  prices_title:"Prix unitaires € HTVA",editable:"modifiables",
+  add_btn:"+ Ajouter",room_ph:"Nom de la pièce...",
+  empty_txt:"Ajoutez la première pièce pour commencer",
+  sum_title:"Récapitulatif devis",no_rooms:"Aucune pièce ajoutée",
+  labor_lbl:"🔧 Main d'oeuvre (€ HTVA)",
+  t_mat:"Matériaux",t_man:"Main d'oeuvre",t_htva:"Sous-total HTVA",t_total:"TOTAL TVAC",
+  pdf_btn:"Générer PDF",reset_btn:"🗑️ Tout effacer",
+  tab_firm:"Entreprise",tab_prices:"Prix",tab_rooms:"Pièces",tab_sum:"Devis",
+  note_ph:"Note (circuit séparé, IP44...)",
+  offer_lbl:"OFFRE / DEVIS",item_desc:"Description",item_qty:"Qté",item_up:"P.U.",item_tot:"Total",
+  sig_firm:"Signature Entreprise",sig_client:"Signature Client",sig_date:"Date",
+  sig_agree:"En signant ce devis, le client accepte les conditions ci-dessus.",
+  clause_title:"Clause travaux supplémentaires",
+  priza1:"Prise simple",priza2:"Prise double",priza3:"Prise triple",priza4:"Prise quadruple",
+  prizaIP:"Prise IP44 ext/sdb",
+  plitaMono:"Prise cuisinière 1F",plitaTri3N:"Prise cuisinière 3F+N+PE",plitaTri3:"Prise cuisinière 3F+PE",
+  int1:"Interrupteur simple",int2:"Interrupteur double",
+  intVV1:"Va-et-vient simple",intVV2:"Double va-et-vient",intBip:"Interrupteur bipolaire",
+  variator:"Variateur",
+  lampa:"Point lumineux",spot:"Spot encastré",corpi:"Luminaire sdb IP44",
+  detector:"Détecteur fumée",detectorCO:"Détecteur CO",baes:"Bloc BAES",
+  tablou:"Tableau électrique",disjunctor:"Disjoncteur (pce)",diferential:"Différentiel 30mA",
+  cablVVB15:"Câble VVB 1,5mm (m)",cablVVB25:"Câble VVB 2,5mm (m)",cablVVB6:"Câble VVB 6mm (m)",
+  cablXGSOH:"Câble XGSOH FE180 (m)",tub16:"Tube IRL 16mm (m)",tub20:"Tube IRL 20mm (m)",
+  tub25:"Tube IRL 25mm (m)",doza:"Boîte dérivation",
+  r0:"🛋️ Salon",r1:"🛏️ Chambre",r2:"🍳 Cuisine",r3:"🚿 Salle de bain",r4:"🚽 WC",
+  r5:"🚪 Hall",r6:"🧱 Cage escalier",r7:"🚗 Garage",r8:"🌿 Terrasse",r9:"📦 Débarras",r10:"⚡ Tableau",
+},
+nl:{
+  firm_card:"🏢 Bedrijf",client_card:"👤 Klant",
+  l_fnume:"Naam bedrijf",l_ftva:"BTW-nummer",l_ftel:"Telefoon",l_faddr:"Adres",
+  l_cnume:"Naam klant",l_caddr:"Adres werf",l_ctel:"Telefoon",l_devnr:"Nr. offerte",
+  clause_lbl:"Clausule meerwerken",
+  p_fnume:"Naam van het bedrijf",p_ftva:"BE 0000.000.000",p_faddr:"Straat, nr, gemeente",
+  p_cnume:"Naam van de klant",p_caddr:"Adres van de werf",
+  p_clauza:"Elk bijkomend werk wordt afzonderlijk gefactureerd, mits voorafgaand akkoord van de klant.",
+  prices_title:"Eenheidsprijzen € excl. BTW",editable:"aanpasbaar",
+  add_btn:"+ Toevoegen",room_ph:"Naam van de kamer...",
+  empty_txt:"Voeg de eerste kamer toe om te beginnen",
+  sum_title:"Overzicht bestek",no_rooms:"Geen kamers toegevoegd",
+  labor_lbl:"🔧 Arbeidsloon (€ excl. BTW)",
+  t_mat:"Materialen",t_man:"Arbeidsloon",t_htva:"Subtotaal excl. BTW",t_total:"TOTAAL incl. BTW",
+  pdf_btn:"PDF genereren",reset_btn:"🗑️ Alles wissen",
+  tab_firm:"Bedrijf",tab_prices:"Prijzen",tab_rooms:"Kamers",tab_sum:"Bestek",
+  note_ph:"Opmerking (apart circuit, IP44...)",
+  offer_lbl:"OFFERTE / BESTEK",item_desc:"Omschrijving",item_qty:"Stuks",item_up:"Eenheidsprijs",item_tot:"Totaal",
+  sig_firm:"Handtekening Bedrijf",sig_client:"Handtekening Klant",sig_date:"Datum",
+  sig_agree:"Door ondertekening aanvaardt de klant de bovenstaande voorwaarden.",
+  clause_title:"Clausule meerwerken",
+  priza1:"Enkel stopcontact",priza2:"Dubbel stopcontact",priza3:"Drievoudig stopcontact",priza4:"Viervoudig stopcontact",
+  prizaIP:"Stopcontact IP44 buiten/bad",
+  plitaMono:"Kookplaat contact 1F",plitaTri3N:"Kookplaat contact 3F+N+PE",plitaTri3:"Kookplaat contact 3F+PE",
+  int1:"Enkelvoudige schakelaar",int2:"Dubbele schakelaar",
+  intVV1:"Wisselschakelaar enkel",intVV2:"Wisselschakelaar dubbel",intBip:"Bipolaire schakelaar",
+  variator:"Dimmer",
+  lampa:"Lichtpunt",spot:"Inbouwspot",corpi:"Badkamerlamp IP44",
+  detector:"Rookmelder",detectorCO:"CO-melder",baes:"Noodverlichting BAES",
+  tablou:"Elektrisch bord",disjunctor:"Automaat (stuk)",diferential:"Aardlekschakelaar 30mA",
+  cablVVB15:"Kabel VVB 1,5mm (m)",cablVVB25:"Kabel VVB 2,5mm (m)",cablVVB6:"Kabel VVB 6mm (m)",
+  cablXGSOH:"Kabel XGSOH FE180 (m)",tub16:"Buis IRL 16mm (m)",tub20:"Buis IRL 20mm (m)",
+  tub25:"Buis IRL 25mm (m)",doza:"Aftakdoos",
+  r0:"🛋️ Woonkamer",r1:"🛏️ Slaapkamer",r2:"🍳 Keuken",r3:"🚿 Badkamer",r4:"🚽 WC",
+  r5:"🚪 Gang",r6:"🧱 Trappenhuis",r7:"🚗 Garage",r8:"🌿 Terras",r9:"📦 Berging",r10:"⚡ Schakelkast",
+}};
+
+// ── ITEMS ─────────────────────────────────────────────────
+const ITEMS=[
+  {k:'priza1',e:'🔌',p:35},{k:'priza2',e:'🔌🔌',p:45},
+  {k:'priza3',e:'🔌✕3',p:55},{k:'priza4',e:'🔌✕4',p:65},
+  {k:'prizaIP',e:'🌧️',p:58},
+  {k:'plitaMono',e:'🍳1F',p:45},{k:'plitaTri3N',e:'🍳3F+N',p:55},{k:'plitaTri3',e:'🍳3F',p:50},
+  {k:'int1',e:'💡',p:28},{k:'int2',e:'💡💡',p:38},
+  {k:'intVV1',e:'↕️',p:32},{k:'intVV2',e:'↕️↕️',p:45},
+  {k:'intBip',e:'⊞',p:42},{k:'variator',e:'🔆',p:65},
+  {k:'lampa',e:'💡',p:38},{k:'spot',e:'✨',p:45},{k:'corpi',e:'🚿',p:70},
+  {k:'detector',e:'🔴',p:80},{k:'detectorCO',e:'🟠',p:90},{k:'baes',e:'🟢',p:120},
+  {k:'tablou',e:'⚡',p:350},{k:'disjunctor',e:'🔲',p:18},{k:'diferential',e:'🛡️',p:85},
+  {k:'cablVVB15',e:'〰️',p:1.8},{k:'cablVVB25',e:'〰️',p:2.4},{k:'cablVVB6',e:'〰️',p:4.2},
+  {k:'cablXGSOH',e:'🔥',p:3.5},
+  {k:'tub16',e:'⬜',p:0.9},{k:'tub20',e:'⬜',p:1.2},{k:'tub25',e:'⬜',p:1.5},
+  {k:'doza',e:'📦',p:8},
+];
+
+const ROOM_NAMES=['r0','r1','r2','r3','r4','r5','r6','r7','r8','r9','r10'];
+const ROOM_EMOJIS=['🛋️','🛏️','🍳','🚿','🚽','🚪','🧱','🚗','🌿','📦','⚡'];
+
+let lang='ro', prices={}, rooms=[], currentTab=0;
+
+// ── INIT ──────────────────────────────────────────────────
+function init(){
+  ITEMS.forEach(i=>prices[i.k]=i.p);
+  // register SW
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  setLang('ro');
+  document.getElementById('sumDate').textContent=new Date().toLocaleDateString('fr-BE');
+  document.getElementById('clausaText').value=T.ro.p_clauza;
+  renderPrices();
+  recalc();
+}
+
+// ── LANG ──────────────────────────────────────────────────
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active',
+      (l==='ro'&&b.textContent==='RO')||(l==='fr'&&b.textContent==='FR')||(l==='nl'&&b.textContent==='NL'));
+  });
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k=el.getAttribute('data-t');
+    if(T[l][k]!==undefined) el.textContent=T[l][k];
+  });
+  document.querySelectorAll('[data-ph]').forEach(el=>{
+    const k=el.getAttribute('data-ph');
+    if(T[l][k]!==undefined) el.placeholder=T[l][k];
+  });
+  // update room select
+  const sel=document.getElementById('roomTypeSelect');
+  ROOM_EMOJIS.forEach((e,i)=>{ sel.options[i].textContent=e; });
+  // update clause if default
+  const ct=document.getElementById('clausaText');
+  const defaults=[T.ro.p_clauza,T.fr.p_clauza,T.nl.p_clauza];
+  if(!ct.value||defaults.includes(ct.value)) ct.value=T[l].p_clauza;
+  renderPrices();
+  renderRooms();
+  updateSum();
+}
+
+// ── TABS ──────────────────────────────────────────────────
+const PAGES=['page-firm','page-prices','page-rooms','page-sum'];
+function goTab(i){
+  currentTab=i;
+  PAGES.forEach((p,j)=>{
+    document.getElementById(p).classList.toggle('active',j===i);
+    document.getElementById('tab'+j).classList.toggle('active',j===i);
+  });
+  document.getElementById('scrollArea').scrollTop=0;
+}
+
+// ── PRICES ────────────────────────────────────────────────
+function renderPrices(){
+  document.getElementById('priceGrid').innerHTML=ITEMS.map(item=>`
+    <div class="pi">
+      <div class="pi-lbl">${item.e} ${T[lang][item.k]||item.k}</div>
+      <div class="pi-row">
+        <input type="number" inputmode="decimal" class="pi-inp" value="${prices[item.k]}"
+          min="0" step="0.5" oninput="prices['${item.k}']=parseFloat(this.value)||0;recalc()">
+        <span class="pi-eur">€</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── ROOMS ─────────────────────────────────────────────────
+function addRoom(){
+  const inp=document.getElementById('roomInp');
+  const sel=document.getElementById('roomTypeSelect');
+  const emoji=sel.value;
+  const eidx=ROOM_EMOJIS.indexOf(emoji);
+  const name=inp.value.trim()||(eidx>=0?T[lang][ROOM_NAMES[eidx]]||emoji:emoji);
+  const room={id:Date.now(),name,emoji,items:{},note:''};
+  ITEMS.forEach(i=>room.items[i.k]=0);
+  rooms.push(room);
+  inp.value='';
+  renderRooms();
+  recalc();
+  toast(T[lang].add_btn||'+ Add');
+}
+
+function removeRoom(id){
+  rooms=rooms.filter(r=>r.id!==id);
+  renderRooms(); recalc();
+}
+
+function chg(rid,k,d){
+  const r=rooms.find(r=>r.id===rid); if(!r)return;
+  r.items[k]=Math.max(0,(r.items[k]||0)+d);
+  // update just this item UI
+  const el=document.getElementById(`is_${rid}_${k}`);
+  const ic=document.getElementById(`ic_${rid}_${k}`);
+  const qi=document.getElementById(`qi_${rid}_${k}`);
+  if(qi) qi.value=r.items[k];
+  const sub=r.items[k]*prices[k];
+  if(el) el.textContent=sub>0?fmt(sub)+' €':'';
+  if(ic) ic.classList.toggle('active',r.items[k]>0);
+  updateRoomTotal(r);
+  recalcTotals();
+}
+
+function setQ(rid,k,v){
+  const r=rooms.find(r=>r.id===rid); if(!r)return;
+  r.items[k]=Math.max(0,parseInt(v)||0);
+  const sub=r.items[k]*prices[k];
+  const el=document.getElementById(`is_${rid}_${k}`);
+  const ic=document.getElementById(`ic_${rid}_${k}`);
+  if(el) el.textContent=sub>0?fmt(sub)+' €':'';
+  if(ic) ic.classList.toggle('active',r.items[k]>0);
+  updateRoomTotal(r);
+  recalcTotals();
+}
+
+function updateRoomTotal(r){
+  const el=document.getElementById(`rct_${r.id}`);
+  if(el) el.textContent=fmt(calcRoom(r))+' €';
+}
+
+function renderRooms(){
+  const list=document.getElementById('roomsList');
+  if(!rooms.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">🏗️</div><div class="empty-txt">${T[lang].empty_txt||'Adauga o camera'}</div></div>`;
+    return;
+  }
+  list.innerHTML=rooms.map(room=>`
+    <div class="rc" id="rc_${room.id}">
+      <div class="rch">
+        <div class="rcn">${room.emoji} ${room.name}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="rct" id="rct_${room.id}">${fmt(calcRoom(room))} €</span>
+          <button class="btn-del" onclick="removeRoom(${room.id})">✕</button>
+        </div>
+      </div>
+      <div class="rcb">
+        <div class="ig">
+          ${ITEMS.map(item=>{
+            const q=room.items[item.k]||0;
+            const s=q*prices[item.k];
+            return `<div class="ic${q>0?' active':''}" id="ic_${room.id}_${item.k}">
+              <div class="ic-lbl">${item.e} ${T[lang][item.k]||item.k}</div>
+              <div class="qr">
+                <button class="qb" onclick="chg(${room.id},'${item.k}',-1)">−</button>
+                <input type="number" inputmode="numeric" class="qi" id="qi_${room.id}_${item.k}"
+                  value="${q}" min="0"
+                  onchange="setQ(${room.id},'${item.k}',this.value)"
+                  oninput="setQ(${room.id},'${item.k}',this.value)">
+                <button class="qb" onclick="chg(${room.id},'${item.k}',1)">+</button>
+              </div>
+              <div class="is" id="is_${room.id}_${item.k}">${s>0?fmt(s)+' €':''}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <input type="text" class="rni" placeholder="${T[lang].note_ph||'Nota...'}"
+          value="${room.note}" onchange="rooms.find(r=>r.id===${room.id}).note=this.value">
+      </div>
+    </div>`).join('');
+}
+
+// ── CALC ──────────────────────────────────────────────────
+function calcRoom(r){ return ITEMS.reduce((s,i)=>s+(r.items[i.k]||0)*prices[i.k],0); }
+function calcTotals(){
+  const mat=rooms.reduce((s,r)=>s+calcRoom(r),0);
+  const man=parseFloat(document.getElementById('manopera').value)||0;
+  const tva=parseFloat(document.getElementById('tvaSelect').value);
+  const htva=mat+man, tvaAmt=htva*tva, tvac=htva+tvaAmt;
+  return{mat,man,htva,tvaAmt,tvac,tva};
+}
+function recalc(){ updateSum(); }
+function recalcTotals(){ updateSum(); }
+function updateSum(){
+  const {mat,man,htva,tvaAmt,tvac,tva}=calcTotals();
+  const rows=document.getElementById('sumRows');
+  if(!rooms.length){
+    rows.innerHTML=`<div style="text-align:center;color:var(--g4);padding:16px;font-size:13px">${T[lang].no_rooms||'—'}</div>`;
+  } else {
+    rows.innerHTML=rooms.map(r=>`
+      <div class="sum-row">
+        <span class="sum-name">${r.emoji} ${r.name}</span>
+        <span class="sum-amt">${fmt(calcRoom(r))} €</span>
+      </div>`).join('');
+  }
+  document.getElementById('tMat').textContent=fmt(mat)+' €';
+  document.getElementById('tMan').textContent=fmt(man)+' €';
+  document.getElementById('tHTVA').textContent=fmt(htva)+' €';
+  document.getElementById('tTVA').textContent=fmt(tvaAmt)+' €';
+  document.getElementById('tTotal').textContent=fmt(tvac)+' €';
+  document.getElementById('tvaLbl').textContent=`TVA ${Math.round(tva*100)}%`;
+}
+function fmt(n){ return n.toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ── RESET ─────────────────────────────────────────────────
+function resetAll(){
+  if(confirm(lang==='nl'?'Alles wissen?':lang==='fr'?'Tout effacer?':'Stergi tot devizul?')){
+    rooms=[];
+    document.getElementById('manopera').value=0;
+    renderRooms(); recalc();
+    toast('✓ Reset');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// PDF GENERATION via jsPDF
+// ══════════════════════════════════════════════════════════
+function makePDF(){
+  const t=T[lang];
+  const {mat,man,htva,tvaAmt,tvac,tva}=calcTotals();
+
+  // collect firm/client data
+  const firmNume=document.getElementById('firmNume').value||'—';
+  const firmTva=document.getElementById('firmTva').value||'';
+  const firmTel=document.getElementById('firmTel').value||'';
+  const firmAddr=document.getElementById('firmAddr').value||'';
+  const firmEmail=document.getElementById('firmEmail').value||'';
+  const clientNume=document.getElementById('clientNume').value||'—';
+  const clientAddr=document.getElementById('clientAddr').value||'';
+  const clientTel=document.getElementById('clientTel').value||'';
+  const devizNr=document.getElementById('devizNr').value||'—';
+  const clauza=document.getElementById('clausaText').value||'';
+  const dateStr=new Date().toLocaleDateString('fr-BE');
+
+  // check jsPDF loaded
+  if(!window.jspdf){
+    toast('⚠️ jsPDF loading...');
+    setTimeout(makePDF,1500); return;
+  }
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, H=297;
+  const ML=15, MR=15, MT=15;
+  let y=MT;
+
+  // helpers
+  const navy=[10,22,40];
+  const yellow=[245,158,11];
+  const white=[255,255,255];
+  const gray1=[248,249,250];
+  const gray3=[208,215,224];
+  const gray5=[90,101,120];
+  const green=[16,185,129];
+  const red=[239,68,68];
+  const textCol=[15,25,35];
+
+  function setFont(size,style='normal',color=textCol){
+    doc.setFontSize(size); doc.setFont('helvetica',style); doc.setTextColor(...color);
+  }
+  function fillRect(x,fy,w,h,col){
+    doc.setFillColor(...col); doc.rect(x,fy,w,h,'F');
+  }
+  function lineH(fy,col=gray3,lw=0.3){
+    doc.setDrawColor(...col); doc.setLineWidth(lw); doc.line(ML,fy,W-MR,fy);
+  }
+  function text(txt,x,fy,opts={}){
+    doc.text(String(txt),x,fy,opts);
+  }
+  function wrapText(txt,x,fy,maxW,lineH=5){
+    const lines=doc.splitTextToSize(String(txt),maxW);
+    lines.forEach((l,i)=>text(l,x,fy+i*lineH));
+    return fy+lines.length*lineH;
+  }
+
+  // ── HEADER BAR ───────────────────────────────────────────
+  fillRect(0,0,W,28,navy);
+  fillRect(0,28,W,1.5,yellow);
+
+  // lightning bolt
+  setFont(18,'bold',yellow);
+  text('⚡',ML,20);
+
+  // firm name
+  setFont(14,'bold',white);
+  text(firmNume,ML+12,16);
+
+  // firm details small
+  setFont(8,'normal',[180,190,200]);
+  let finfo=[firmTva,firmTel,firmAddr,firmEmail].filter(Boolean).join('  ·  ');
+  if(finfo) text(finfo,ML+12,22);
+
+  // OFFER label right
+  setFont(16,'bold',yellow);
+  text(t.offer_lbl,W-MR,14,{align:'right'});
+  setFont(8,'normal',[180,190,200]);
+  text(`N°: ${devizNr}`,W-MR,20,{align:'right'});
+  text(`${t.sig_date}: ${dateStr}`,W-MR,25,{align:'right'});
+
+  y=34;
+
+  // ── PARTIES ──────────────────────────────────────────────
+  fillRect(0,y,W,32,gray1);
+  const colW=(W-ML-MR)/2-4;
+
+  // FIRMA box
+  doc.setDrawColor(...gray3); doc.setLineWidth(0.3);
+  doc.rect(ML,y+2,colW,28);
+  fillRect(ML,y+2,colW,6,navy);
+  setFont(7,'bold',yellow);
+  const firmCardLabel = lang==='nl'?'BEDRIJF':lang==='fr'?'ENTREPRISE':'FIRMA';
+  text(firmCardLabel, ML+3, y+6.5);
+  setFont(9,'bold',textCol);
+  text(firmNume,ML+3,y+14);
+  setFont(8,'normal',gray5);
+  if(firmTva) text('TVA: '+firmTva,ML+3,y+19);
+  if(firmAddr) text(firmAddr,ML+3,y+24);
+  if(firmTel||firmEmail) text([firmTel,firmEmail].filter(Boolean).join('  '),ML+3,y+28.5);
+
+  // CLIENT box
+  const cx=ML+colW+8;
+  doc.rect(cx,y+2,colW,28);
+  fillRect(cx,y+2,colW,6,navy);
+  setFont(7,'bold',yellow);
+  const clientCardLabel = lang==='nl'?'KLANT':lang==='fr'?'CLIENT':'CLIENT';
+  text(clientCardLabel, cx+3, y+6.5);
+  setFont(9,'bold',textCol);
+  text(clientNume,cx+3,y+14);
+  setFont(8,'normal',gray5);
+  if(clientAddr) text(clientAddr,cx+3,y+19);
+  if(clientTel) text(clientTel,cx+3,y+24);
+
+  y+=36;
+  lineH(y,yellow,1.5); y+=4;
+
+  // ── ITEMS TABLE ───────────────────────────────────────────
+  // Table header
+  fillRect(ML,y,W-ML-MR,8,navy);
+  setFont(8,'bold',white);
+  text(t.item_desc,ML+3,y+5.5);
+  text(t.item_qty,W-MR-52,y+5.5,{align:'right'});
+  text(t.item_up,W-MR-28,y+5.5,{align:'right'});
+  text(t.item_tot,W-MR-2,y+5.5,{align:'right'});
+  lineH(y+8,yellow,0.8);
+  y+=10;
+
+  // Show ALL rooms, ALL items — client sees everything
+  rooms.forEach(room=>{
+    if(y>H-60){ doc.addPage(); y=15; }
+
+    // Room header bar
+    fillRect(ML,y,W-ML-MR,8,navy);
+    setFont(10,'bold',yellow);
+    text(room.name.toUpperCase(), ML+4, y+5.8);
+    const rt=calcRoom(room);
+    setFont(9,'bold',yellow);
+    text(fmt(rt)+' EUR', W-MR-2, y+5.8, {align:'right'});
+    y+=9;
+
+    // Column sub-header
+    fillRect(ML,y,W-ML-MR,5.5,[235,238,242]);
+    setFont(7,'bold',gray5);
+    text(t.item_desc, ML+3, y+4);
+    text(t.item_qty, W-MR-52, y+4, {align:'right'});
+    text(t.item_up, W-MR-28, y+4, {align:'right'});
+    text(t.item_tot, W-MR-2, y+4, {align:'right'});
+    y+=6;
+
+    let rowBg=false;
+    ITEMS.forEach(item=>{
+      const q=room.items[item.k]||0;
+      if(y>H-25){ doc.addPage(); y=15; }
+
+      const sub=q*prices[item.k];
+      const bg=rowBg?[248,249,252]:white;
+      fillRect(ML,y,W-ML-MR,6.5,bg);
+
+      // item name
+      setFont(8,'normal',q>0?textCol:gray5);
+      const itemName=T[lang][item.k]||item.k;
+      text(itemName, ML+3, y+4.5);
+
+      // qty — highlight if >0
+      if(q>0){
+        fillRect(W-MR-58,y+0.5,14,5.5,[245,158,11]);
+        setFont(8,'bold',white);
+        text(String(q), W-MR-52, y+4.5, {align:'right'});
+      } else {
+        setFont(8,'normal',[200,205,210]);
+        text('0', W-MR-52, y+4.5, {align:'right'});
+      }
+
+      // unit price
+      setFont(8,'normal',q>0?gray5:[210,215,220]);
+      text(fmt(prices[item.k])+' EUR', W-MR-28, y+4.5, {align:'right'});
+
+      // subtotal
+      setFont(8, q>0?'bold':'normal', q>0?textCol:[210,215,220]);
+      text(q>0?fmt(sub)+' EUR':'—', W-MR-2, y+4.5, {align:'right'});
+
+      doc.setDrawColor(225,230,235); doc.setLineWidth(0.15);
+      doc.line(ML,y+6.5,W-MR,y+6.5);
+      y+=7; rowBg=!rowBg;
+    });
+
+    // Room subtotal row
+    fillRect(ML,y,W-ML-MR,7,[230,235,240]);
+    setFont(8,'bold',navy);
+    const subtotLabel=lang==='nl'?'Subtotaal kamer:':lang==='fr'?'Sous-total pièce:':'Subtotal camera:';
+    text(subtotLabel, ML+3, y+5);
+    text(fmt(rt)+' EUR', W-MR-2, y+5, {align:'right'});
+    y+=8;
+
+    if(room.note){
+      setFont(7.5,'italic',gray5);
+      text('Nota: '+room.note, ML+3, y+4);
+      y+=6;
+    }
+    y+=4;
+  });
+
+  // ── TOTALS ────────────────────────────────────────────────
+  if(y>H-55){ doc.addPage(); y=15; }
+  y+=2; lineH(y,gray3,0.5); y+=4;
+
+  fillRect(W-MR-70,y,70,man>0?34:28,gray1);
+  const tx=W-MR-68;
+
+  setFont(8,'normal',gray5);
+  text(t.t_mat,tx,y+5);
+  setFont(8,'bold',textCol);
+  text(fmt(mat)+' €',W-MR-2,y+5,{align:'right'});
+
+  if(man>0){
+    setFont(8,'normal',gray5);
+    text(t.t_man,tx,y+11);
+    setFont(8,'bold',textCol);
+    text(fmt(man)+' €',W-MR-2,y+11,{align:'right'});
+
+    setFont(8,'normal',gray5);
+    text(t.t_htva,tx,y+17);
+    setFont(8,'bold',textCol);
+    text(fmt(htva)+' €',W-MR-2,y+17,{align:'right'});
+
+    setFont(8,'normal',red);
+    text(`TVA ${Math.round(tva*100)}%`,tx,y+23);
+    setFont(8,'bold',red);
+    text(fmt(tvaAmt)+' €',W-MR-2,y+23,{align:'right'});
+
+    y+=28;
+  } else {
+    setFont(8,'normal',gray5);
+    text(t.t_htva,tx,y+11);
+    setFont(8,'bold',textCol);
+    text(fmt(htva)+' €',W-MR-2,y+11,{align:'right'});
+
+    setFont(8,'normal',red);
+    text(`TVA ${Math.round(tva*100)}%`,tx,y+17);
+    setFont(8,'bold',red);
+    text(fmt(tvaAmt)+' €',W-MR-2,y+17,{align:'right'});
+
+    y+=22;
+  }
+
+  // BIG TOTAL
+  fillRect(W-MR-70,y,70,12,navy);
+  setFont(7,'bold',yellow);
+  text(t.t_total,tx,y+5);
+  setFont(11,'bold',white);
+  text(fmt(tvac)+' €',W-MR-2,y+8,{align:'right'});
+  y+=16;
+
+  // ── CLAUSE ───────────────────────────────────────────────
+  if(clauza && y<H-30){
+    lineH(y,yellow,0.8); y+=4;
+    fillRect(ML,y,W-ML-MR,20,gray1);
+    doc.setDrawColor(...yellow); doc.setLineWidth(1.5);
+    doc.line(ML,y,ML,y+20);
+    setFont(7,'bold',[146,64,14]);
+    text(t.clause_title.toUpperCase(),ML+4,y+5);
+    setFont(7.5,'normal',gray5);
+    const cl=doc.splitTextToSize(clauza,W-ML-MR-8);
+    cl.slice(0,2).forEach((l,i)=>text(l,ML+4,y+10+i*4.5));
+    y+=24;
+  }
+
+  // ── SIGNATURE SECTION ─────────────────────────────────────
+  // ── SIGNATURE PAGE ────────────────────────────────────────
+  // Always put signatures on a fresh area — add page if not enough space
+  if(y > H - 115) { doc.addPage(); y = 15; }
+
+  y += 6;
+  // Agreement text
+  lineH(y, yellow, 1);
+  y += 6;
+  setFont(8,'italic',gray5);
+  const agreeLines = doc.splitTextToSize(t.sig_agree, W-ML-MR);
+  agreeLines.forEach((l,i) => text(l, ML, y + i*4.5));
+  y += agreeLines.length * 4.5 + 10;
+
+  // Two big signature boxes side by side: FIRMA left, CLIENT right
+  const boxW = (W - ML - MR - 8) / 2;
+  const boxH = 55;
+
+  // ── BOX FIRMA ──
+  doc.setDrawColor(...navy);
+  doc.setLineWidth(0.8);
+  doc.rect(ML, y, boxW, boxH);
+  // header strip
+  fillRect(ML, y, boxW, 9, navy);
+  setFont(8,'bold', white);
+  text(t.sig_firm, ML + boxW/2, y + 6, {align:'center'});
+  // name under header
+  setFont(9,'bold', textCol);
+  text(firmNume, ML + 4, y + 16);
+  // "Semnatura:" label
+  setFont(7,'normal', gray5);
+  text(lang==='nl'?'Handtekening:':lang==='fr'?'Signature:':'Semnatura:', ML + 4, y + 24);
+  // big blank signing area with dotted border
+  doc.setDrawColor(...gray3);
+  doc.setLineWidth(0.3);
+  doc.setLineDashPattern([1,1], 0);
+  doc.rect(ML + 4, y + 27, boxW - 8, 20);
+  doc.setLineDashPattern([], 0);
+  // date line at bottom
+  doc.setDrawColor(...gray3);
+  doc.setLineWidth(0.5);
+  doc.line(ML + 4, y + boxH - 6, ML + 4 + 40, y + boxH - 6);
+  setFont(7,'normal', gray5);
+  text(t.sig_date+':', ML + 4, y + boxH - 2);
+
+  // ── BOX CLIENT ──
+  const cx2 = ML + boxW + 8;
+  doc.setDrawColor(...navy);
+  doc.setLineWidth(0.8);
+  doc.rect(cx2, y, boxW, boxH);
+  // header strip
+  fillRect(cx2, y, boxW, 9, navy);
+  setFont(8,'bold', white);
+  text(t.sig_client, cx2 + boxW/2, y + 6, {align:'center'});
+  // name under header
+  setFont(9,'bold', textCol);
+  text(clientNume, cx2 + 4, y + 16);
+  // "Semnatura:" label
+  setFont(7,'normal', gray5);
+  text(lang==='nl'?'Handtekening:':lang==='fr'?'Signature:':'Semnatura:', cx2 + 4, y + 24);
+  // big blank signing area
+  doc.setDrawColor(...gray3);
+  doc.setLineWidth(0.3);
+  doc.setLineDashPattern([1,1], 0);
+  doc.rect(cx2 + 4, y + 27, boxW - 8, 20);
+  doc.setLineDashPattern([], 0);
+  // date line at bottom
+  doc.setDrawColor(...gray3);
+  doc.setLineWidth(0.5);
+  doc.line(cx2 + 4, y + boxH - 6, cx2 + 4 + 40, y + boxH - 6);
+  setFont(7,'normal', gray5);
+  text(t.sig_date+':', cx2 + 4, y + boxH - 2);
+
+  y += boxH + 6;
+
+  // Small note below boxes
+  setFont(7,'italic', gray5);
+  const readNote = lang==='nl'
+    ? 'Gelezen en goedgekeurd — Lu et approuvé — Citit si aprobat'
+    : lang==='fr'
+    ? 'Lu et approuvé — Gelezen en goedgekeurd — Citit si aprobat'
+    : 'Citit si aprobat — Lu et approuvé — Gelezen en goedgekeurd';
+  text(readNote, W/2, y, {align:'center'});
+
+  // ── FOOTER ───────────────────────────────────────────────
+  fillRect(0, H-10, W, 10, navy);
+  fillRect(0, H-10, W, 1.5, yellow);
+  setFont(7,'normal',[150,160,175]);
+  const footerTxt = [firmNume, firmTva?'BTW '+firmTva:'', firmAddr, firmEmail].filter(Boolean).join('  ·  ');
+  text(footerTxt, W/2, H-4, {align:'center'});
+
+  // ── OPEN PDF IN NEW TAB (works on mobile) ─────────────────
+  const fname = `Deviz_${clientNume.replace(/\s+/g,'_')}_${devizNr}_${dateStr.replace(/\//g,'-')}.pdf`;
+
+  try {
+    // Method 1: blobUrl — best for mobile, opens in browser viewer
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    // Show modal with options
+    showPDFModal(blobUrl, fname, doc);
+  } catch(e) {
+    // Fallback: direct save
+    doc.save(fname);
+    toast('✓ PDF salvat in Downloads!');
+  }
+}
+
+// ── PDF MODAL ─────────────────────────────────────────────
+function showPDFModal(blobUrl, fname, doc) {
+  // Remove existing modal
+  const old = document.getElementById('pdfModal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'pdfModal';
+  modal.innerHTML = `
+    <div class="pm-overlay" onclick="closePDFModal()"></div>
+    <div class="pm-box">
+      <div class="pm-head">
+        <span class="pm-title">📄 PDF Gata!</span>
+        <button class="pm-close" onclick="closePDFModal()">✕</button>
+      </div>
+      <div class="pm-body">
+        <div class="pm-icon">✅</div>
+        <div class="pm-msg">Devizul a fost generat cu succes!</div>
+        <div class="pm-fname">${fname}</div>
+        <a class="pm-btn pm-btn-primary" href="${blobUrl}" download="${fname}" onclick="setTimeout(closePDFModal,500)">
+          ⬇️ Descarca PDF
+        </a>
+        <a class="pm-btn pm-btn-secondary" href="${blobUrl}" target="_blank" rel="noopener">
+          👁️ Deschide / Vizualizeaza
+        </a>
+        <button class="pm-btn pm-btn-ghost" onclick="doc_save_fallback('${fname}')">
+          💾 Salveaza direct
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // store doc reference for fallback
+  window._lastDoc = doc;
+  window._lastFname = fname;
+}
+
+function doc_save_fallback(fname) {
+  if(window._lastDoc) { window._lastDoc.save(window._lastFname||fname); }
+  closePDFModal();
+}
+
+function closePDFModal() {
+  const m = document.getElementById('pdfModal');
+  if(m) { m.style.opacity='0'; setTimeout(()=>m.remove(), 300); }
+}
+
+// ── START ─────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
