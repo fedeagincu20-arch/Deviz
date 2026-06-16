@@ -833,6 +833,10 @@ function updateSum(){
   document.getElementById('tvaLbl').textContent=`TVA ${Math.round(tva*100)}%`;
 }
 function fmt(n){ return n.toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+// PDF-safe format — no apostrophe thousands separator (breaks jsPDF)
+function fmtPDF(n){ 
+  return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
 
 // ── TOAST ─────────────────────────────────────────────────
 function toast(msg){
@@ -983,17 +987,17 @@ function makePDF(){
   lineH(y+8,yellow,0.8);
   y+=10;
 
-  // Show ALL rooms, ALL items — client sees everything
+  // Show ALL rooms, only items with qty > 0
   rooms.forEach(room=>{
     if(y>H-60){ doc.addPage(); y=15; }
 
+    const rt=calcRoom(room);
     // Room header bar
     fillRect(ML,y,W-ML-MR,8,navy);
     setFont(10,'bold',yellow);
     text(room.name.toUpperCase(), ML+4, y+5.8);
-    const rt=calcRoom(room);
     setFont(9,'bold',yellow);
-    text(fmt(rt)+' EUR', W-MR-2, y+5.8, {align:'right'});
+    text(fmtPDF(rt)+' EUR', W-MR-2, y+5.8, {align:'right'});
     y+=9;
 
     // Column sub-header
@@ -1008,34 +1012,30 @@ function makePDF(){
     let rowBg=false;
     ITEMS.forEach(item=>{
       const q=room.items[item.k]||0;
-      if(y>H-25){ doc.addPage(); y=15; }
+      if(!q) return; // ASCUNDE elementele cu 0
 
+      if(y>H-25){ doc.addPage(); y=15; }
       const sub=q*prices[item.k];
       const bg=rowBg?[248,249,252]:white;
       fillRect(ML,y,W-ML-MR,6.5,bg);
 
       // item name
-      setFont(8,'normal',q>0?textCol:gray5);
+      setFont(8,'normal',textCol);
       const itemName=T[lang][item.k]||item.k;
       text(itemName, ML+3, y+4.5);
 
-      // qty — highlight if >0
-      if(q>0){
-        fillRect(W-MR-58,y+0.5,14,5.5,[245,158,11]);
-        setFont(8,'bold',white);
-        text(String(q), W-MR-52, y+4.5, {align:'right'});
-      } else {
-        setFont(8,'normal',[200,205,210]);
-        text('0', W-MR-52, y+4.5, {align:'right'});
-      }
+      // qty — galben
+      fillRect(W-MR-58,y+0.5,14,5.5,[245,158,11]);
+      setFont(8,'bold',white);
+      text(String(q), W-MR-52, y+4.5, {align:'right'});
 
       // unit price
-      setFont(8,'normal',q>0?gray5:[210,215,220]);
-      text(fmt(prices[item.k])+' EUR', W-MR-28, y+4.5, {align:'right'});
+      setFont(8,'normal',gray5);
+      text(fmtPDF(prices[item.k])+' EUR', W-MR-28, y+4.5, {align:'right'});
 
       // subtotal
-      setFont(8, q>0?'bold':'normal', q>0?textCol:[210,215,220]);
-      text(q>0?fmt(sub)+' EUR':'—', W-MR-2, y+4.5, {align:'right'});
+      setFont(8,'bold',textCol);
+      text(fmtPDF(sub)+' EUR', W-MR-2, y+4.5, {align:'right'});
 
       doc.setDrawColor(225,230,235); doc.setLineWidth(0.15);
       doc.line(ML,y+6.5,W-MR,y+6.5);
@@ -1045,9 +1045,9 @@ function makePDF(){
     // Room subtotal row
     fillRect(ML,y,W-ML-MR,7,[230,235,240]);
     setFont(8,'bold',navy);
-    const subtotLabel=lang==='nl'?'Subtotaal kamer:':lang==='fr'?'Sous-total pièce:':'Subtotal camera:';
+    const subtotLabel=lang==='nl'?'Subtotaal kamer:':lang==='fr'?'Sous-total piece:':'Subtotal camera:';
     text(subtotLabel, ML+3, y+5);
-    text(fmt(rt)+' EUR', W-MR-2, y+5, {align:'right'});
+    text(fmtPDF(rt)+' EUR', W-MR-2, y+5, {align:'right'});
     y+=8;
 
     if(room.note){
@@ -1068,35 +1068,35 @@ function makePDF(){
   setFont(8,'normal',gray5);
   text(t.t_mat,tx,y+5);
   setFont(8,'bold',textCol);
-  text(fmt(mat)+' €',W-MR-2,y+5,{align:'right'});
+  text(fmtPDF(mat)+' EUR',W-MR-2,y+5,{align:'right'});
 
   if(man>0){
     setFont(8,'normal',gray5);
     text(t.t_man,tx,y+11);
     setFont(8,'bold',textCol);
-    text(fmt(man)+' €',W-MR-2,y+11,{align:'right'});
+    text(fmtPDF(man)+' EUR',W-MR-2,y+11,{align:'right'});
 
     setFont(8,'normal',gray5);
     text(t.t_htva,tx,y+17);
     setFont(8,'bold',textCol);
-    text(fmt(htva)+' €',W-MR-2,y+17,{align:'right'});
+    text(fmtPDF(htva)+' EUR',W-MR-2,y+17,{align:'right'});
 
     setFont(8,'normal',red);
     text(`TVA ${Math.round(tva*100)}%`,tx,y+23);
     setFont(8,'bold',red);
-    text(fmt(tvaAmt)+' €',W-MR-2,y+23,{align:'right'});
+    text(fmtPDF(tvaAmt)+' EUR',W-MR-2,y+23,{align:'right'});
 
     y+=28;
   } else {
     setFont(8,'normal',gray5);
     text(t.t_htva,tx,y+11);
     setFont(8,'bold',textCol);
-    text(fmt(htva)+' €',W-MR-2,y+11,{align:'right'});
+    text(fmtPDF(htva)+' EUR',W-MR-2,y+11,{align:'right'});
 
     setFont(8,'normal',red);
     text(`TVA ${Math.round(tva*100)}%`,tx,y+17);
     setFont(8,'bold',red);
-    text(fmt(tvaAmt)+' €',W-MR-2,y+17,{align:'right'});
+    text(fmtPDF(tvaAmt)+' EUR',W-MR-2,y+17,{align:'right'});
 
     y+=22;
   }
@@ -1106,7 +1106,7 @@ function makePDF(){
   setFont(7,'bold',yellow);
   text(t.t_total,tx,y+5);
   setFont(11,'bold',white);
-  text(fmt(tvac)+' €',W-MR-2,y+8,{align:'right'});
+  text(fmtPDF(tvac)+' EUR',W-MR-2,y+8,{align:'right'});
   y+=16;
 
   // ── CLAUSE ───────────────────────────────────────────────
