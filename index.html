@@ -132,8 +132,31 @@ body{
   font-size:14px;color:var(--text);-webkit-appearance:none;
 }
 .room-inp:focus,.room-sel:focus{outline:none;border-color:var(--yellow)}
-.btn-add{
-  padding:10px 14px;background:var(--yellow);color:var(--navy);
+.logo-section{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.logo-preview{
+  width:90px;height:70px;flex-shrink:0;
+  border:2px dashed var(--g3);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:var(--g1);
+  transition:border-color .15s;overflow:hidden;
+}
+.logo-preview:active{border-color:var(--yellow)}
+.logo-btn{
+  padding:9px 12px;border-radius:7px;border:1.5px solid var(--g3);
+  background:var(--white);color:var(--navy);font-size:12px;font-weight:700;
+  cursor:pointer;text-align:center;width:100%;
+  -webkit-tap-highlight-color:transparent;
+}
+.logo-btn:active{background:var(--yellow);border-color:var(--yellow)}
+.logo-btn-del{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)}
+  padding:8px 12px;
+  background:var(--g1);border:1.5px solid var(--g3);
+  border-radius:20px;font-size:13px;font-weight:600;
+  color:var(--navy);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:.15s;white-space:nowrap;
+}
+.btn-preset:active{background:var(--yellow);border-color:var(--yellow);transform:scale(.95)}
   border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;
   cursor:pointer;white-space:nowrap;flex-shrink:0;
   -webkit-tap-highlight-color:transparent;
@@ -387,9 +410,27 @@ body{
   <!-- PAGE: FIRMA/CLIENT -->
   <div class="page active" id="page-firm">
     <div class="card">
-      <div class="card-head"><span class="card-title" data-t="firm_card">🏢 Firma</span></div>
+      <div class="card-head"><span class="card-title" data-t="firm_card">Firma</span></div>
       <div class="card-body">
-        <div class="input-grid">
+
+        <!-- LOGO UPLOAD -->
+        <div class="logo-section">
+          <div class="logo-preview" id="logoPreview" onclick="document.getElementById('logoInput').click()">
+            <div id="logoPlaceholder">
+              <div style="font-size:28px;margin-bottom:6px">🏢</div>
+              <div style="font-size:11px;color:var(--g4)" data-t="logo_tap">Apasa sa adaugi logo</div>
+            </div>
+            <img id="logoImg" style="display:none;max-width:100%;max-height:100%;object-fit:contain;border-radius:6px">
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(this)">
+            <button class="logo-btn" onclick="document.getElementById('logoInput').click()" data-t="logo_choose">Alege logo</button>
+            <button class="logo-btn logo-btn-del" id="logoDelBtn" onclick="deleteLogo()" style="display:none" data-t="logo_del">Sterge logo</button>
+            <div style="font-size:10px;color:var(--g4);line-height:1.4" data-t="logo_hint">PNG, JPG — apare in PDF</div>
+          </div>
+        </div>
+
+        <div class="input-grid" style="margin-top:12px">
           <div class="input-group full"><div class="input-label" data-t="l_fnume">Numele firmei</div><input class="inp" id="firmNume" data-ph="p_fnume" placeholder="Numele firmei"></div>
           <div class="input-group"><div class="input-label" data-t="l_ftva">Nr. TVA</div><input class="inp" id="firmTva" data-ph="p_ftva" placeholder="BE 0000.000.000"></div>
           <div class="input-group"><div class="input-label" data-t="l_ftel">Telefon</div><input class="inp" id="firmTel" type="tel" placeholder="+32 ..."></div>
@@ -431,24 +472,25 @@ body{
 
   <!-- PAGE: CAMERE -->
   <div class="page" id="page-rooms">
+
+    <!-- Camere predefinite -->
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-head">
+        <span class="card-title" data-t="preset_title">Camere rapide</span>
+        <span class="card-badge" data-t="preset_tap">apasa sa adaugi</span>
+      </div>
+      <div class="card-body" style="padding:10px">
+        <div id="presetGrid" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      </div>
+    </div>
+
+    <!-- Camera custom -->
     <div class="add-row">
-      <select class="room-sel" id="roomTypeSelect">
-        <option value="🛋️">🛋️</option>
-        <option value="🛏️">🛏️</option>
-        <option value="🍳">🍳</option>
-        <option value="🚿">🚿</option>
-        <option value="🚽">🚽</option>
-        <option value="🚪">🚪</option>
-        <option value="🧱">🧱</option>
-        <option value="🚗">🚗</option>
-        <option value="🌿">🌿</option>
-        <option value="📦">📦</option>
-        <option value="⚡">⚡</option>
-      </select>
-      <input class="room-inp" id="roomInp" data-ph="room_ph" placeholder="Numele camerei..."
+      <input class="room-inp" id="roomInp" data-ph="room_ph" placeholder="Sau scrie numele camerei..."
         onkeydown="if(event.key==='Enter'){addRoom();this.blur()}">
       <button class="btn-add" onclick="addRoom()" data-t="add_btn">+ Add</button>
     </div>
+
     <div class="rooms-list" id="roomsList">
       <div class="empty"><div class="empty-icon">🏗️</div><div class="empty-txt" data-t="empty_txt">Adauga prima camera</div></div>
     </div>
@@ -525,7 +567,7 @@ ro:{
   sum_title:"Sumar deviz",no_rooms:"Nicio camera adaugata",
   labor_lbl:"🔧 Manopera (€ excl. TVA)",
   t_mat:"Materiale",t_man:"Manopera",t_htva:"Subtotal HTVA",t_total:"TOTAL TVAC",
-  pdf_btn:"Genereaza PDF",reset_btn:"🗑️ Sterge tot devizul",
+  logo_tap:"Apasa sa adaugi logo",logo_choose:"Alege logo",logo_del:"Sterge logo",logo_hint:"PNG, JPG — apare in PDF",
   tab_firm:"Firma",tab_prices:"Preturi",tab_rooms:"Camere",tab_sum:"Deviz",
   note_ph:"Nota (circuit separat, IP44...)",
   offer_lbl:"OFERTA / DEVIZ",item_desc:"Descriere",item_qty:"Buc",item_up:"Pret unit.",item_tot:"Total",
@@ -534,17 +576,36 @@ ro:{
   clause_title:"Clauza lucrari suplimentare",
   // items
   priza1:"Priza simpla",priza2:"Priza dubla",priza3:"Priza tripla",priza4:"Priza cu 4",
-  prizaIP:"Priza IP44 ext/baie",
-  plitaMono:"Priza plita 1F",plitaTri3N:"Priza plita 3F+N+PE",plitaTri3:"Priza plita 3F+PE",
+  prizaIP:"Priza IP44 baie/ext",prizaIP55:"Priza IP55 exterior",prizaIP55d:"Priza IP55 dubla",
+  prizaInternet:"Priza internet RJ45",prizaTV:"Priza TV coaxiala",
+  plitaMono:"Priza plita monofazata",plitaTri3N:"Priza plita 3F+N+PE",plitaTri3:"Priza plita 3F+PE",
   int1:"Intrerupator simplu",int2:"Intrerupator dublu",
-  intVV1:"Va-et-vient simplu",intVV2:"Va-et-vient dublu",intBip:"Intrerupator bipolar",
-  variator:"Variator lumina",
+  intVV1:"Intrerupator va-et-vient",intVV2:"Int. dublu va-et-vient",
+  intBip:"Intrerupator bipolar",variator:"Variator lumina",
+  int1IP:"Intrerupator simplu IP55",int2IP:"Intrerupator dublu IP55",
+  intVV1IP:"Va-et-vient IP55",intVV2IP:"Va-et-vient dublu IP55",
   lampa:"Punct lumina",spot:"Spot incastrat",corpi:"Corp baie IP44",
-  detector:"Detector fum",detectorCO:"Detector CO",baes:"BAES urgenta",
-  tablou:"Tablou electric",disjunctor:"Disjunctor (buc)",diferential:"Diferential 30mA",
-  cablVVB15:"Cablu VVB 1.5mm (m)",cablVVB25:"Cablu VVB 2.5mm (m)",cablVVB6:"Cablu VVB 6mm (m)",
-  cablXGSOH:"Cablu XGSOH FE180 (m)",tub16:"Tub IRL 16mm (m)",tub20:"Tub IRL 20mm (m)",
-  tub25:"Tub IRL 25mm (m)",doza:"Doza derivatie",
+  lampaIP66:"Lampa IP66 exterior",lampaDetect:"Lampa cu detector miscare",
+  detectorFumAp:"Detector fum aparent",detectorFumInc:"Detector fum incastrat",
+  detectorCO:"Detector CO",baes:"Corp BAES urgenta",
+  impGen:"Impamantare generala",impApa:"Impamantare apa",impGaz:"Impamantare gaz",
+  impPompa:"Impamantare pompa caldura",
+  tablou:"Tablou electric complet",planUnifilar:"Plan unifilar (schema)",
+  cab3g15:"Cablu 3G1.5mm (m)",cab3g25:"Cablu 3G2.5mm (m)",
+  cab5g15:"Cablu 5G1.5mm (m)",cab5g25:"Cablu 5G2.5mm (m)",
+  cab2x10:"Cablu 2x10mm (m)",cab4x10:"Cablu 4x10mm (m)",
+  cabInternet:"Cablu internet UTP Cat6 (m)",cabDetFum:"Cablu detector fum FE180 (m)",
+  cabTerra16:"Cablu impamantare 16mm (m)",cabTerra6:"Cablu impamantare 6mm (m)",
+  cabParl:"Cablu parlofon (m)",
+  tub16:"Tubaj IRL 16mm (m)",tub20:"Tubaj IRL 20mm (m)",
+  tub25:"Tubaj IRL 25mm (m)",tub32:"Tubaj IRL 32mm (m)",
+  tubFlex16:"Tubaj flexibil 16mm (m)",tubFlex20:"Tubaj flexibil 20mm (m)",
+  tubSub40:"Tub subteran EVPC 40mm (m)",tubSub63:"Tub subteran EVPC 63mm (m)",
+  tragCablu:"Tragere cablu tub existent (m)",
+  doza:"Doza derivatie",dozaIP55:"Doza derivatie IP55",tubSolar:"Tub gol panouri solare (m)",
+  camera:"Camera supraveghere IP",parlofon:"Parlofon videointerfon",
+  prizaParl:"Priza parlofon",alimentPompa:"Alimentare pompa caldura",extractorBaie:"Extractor baie",
+  saigneeCaramida:"Taiere canal caramida (m)",saigneeBeton:"Taiere canal beton (m)",
   r0:"🛋️ Living",r1:"🛏️ Dormitor",r2:"🍳 Bucatarie",r3:"🚿 Baie",r4:"🚽 WC",
   r5:"🚪 Hol",r6:"🧱 Casa scarii",r7:"🚗 Garaj",r8:"🌿 Terasa",r9:"📦 Depozit",r10:"⚡ Tablou",
 },
@@ -562,7 +623,7 @@ fr:{
   sum_title:"Récapitulatif devis",no_rooms:"Aucune pièce ajoutée",
   labor_lbl:"🔧 Main d'oeuvre (€ HTVA)",
   t_mat:"Matériaux",t_man:"Main d'oeuvre",t_htva:"Sous-total HTVA",t_total:"TOTAL TVAC",
-  pdf_btn:"Générer PDF",reset_btn:"🗑️ Tout effacer",
+  logo_tap:"Appuyer pour ajouter logo",logo_choose:"Choisir logo",logo_del:"Supprimer logo",logo_hint:"PNG, JPG — apparait dans PDF",
   tab_firm:"Entreprise",tab_prices:"Prix",tab_rooms:"Pièces",tab_sum:"Devis",
   note_ph:"Note (circuit séparé, IP44...)",
   offer_lbl:"OFFRE / DEVIS",item_desc:"Description",item_qty:"Qté",item_up:"P.U.",item_tot:"Total",
@@ -570,22 +631,41 @@ fr:{
   sig_agree:"En signant ce devis, le client accepte les conditions ci-dessus.",
   clause_title:"Clause travaux supplémentaires",
   priza1:"Prise simple",priza2:"Prise double",priza3:"Prise triple",priza4:"Prise quadruple",
-  prizaIP:"Prise IP44 ext/sdb",
-  plitaMono:"Prise cuisinière 1F",plitaTri3N:"Prise cuisinière 3F+N+PE",plitaTri3:"Prise cuisinière 3F+PE",
+  prizaIP:"Prise IP44 sdb/ext",prizaIP55:"Prise IP55 extérieur",prizaIP55d:"Prise double IP55",
+  prizaInternet:"Prise data RJ45",prizaTV:"Prise TV coaxiale",
+  plitaMono:"Prise cuisinière monophasé",plitaTri3N:"Prise cuisinière 3F+N+PE",plitaTri3:"Prise cuisinière 3F+PE",
   int1:"Interrupteur simple",int2:"Interrupteur double",
-  intVV1:"Va-et-vient simple",intVV2:"Double va-et-vient",intBip:"Interrupteur bipolaire",
-  variator:"Variateur",
+  intVV1:"Va-et-vient simple",intVV2:"Double va-et-vient",
+  intBip:"Interrupteur bipolaire",variator:"Variateur de lumière",
+  int1IP:"Interrupteur simple IP55",int2IP:"Interrupteur double IP55",
+  intVV1IP:"Va-et-vient IP55",intVV2IP:"Double va-et-vient IP55",
   lampa:"Point lumineux",spot:"Spot encastré",corpi:"Luminaire sdb IP44",
-  detector:"Détecteur fumée",detectorCO:"Détecteur CO",baes:"Bloc BAES",
-  tablou:"Tableau électrique",disjunctor:"Disjoncteur (pce)",diferential:"Différentiel 30mA",
-  cablVVB15:"Câble VVB 1,5mm (m)",cablVVB25:"Câble VVB 2,5mm (m)",cablVVB6:"Câble VVB 6mm (m)",
-  cablXGSOH:"Câble XGSOH FE180 (m)",tub16:"Tube IRL 16mm (m)",tub20:"Tube IRL 20mm (m)",
-  tub25:"Tube IRL 25mm (m)",doza:"Boîte dérivation",
-  r0:"🛋️ Salon",r1:"🛏️ Chambre",r2:"🍳 Cuisine",r3:"🚿 Salle de bain",r4:"🚽 WC",
-  r5:"🚪 Hall",r6:"🧱 Cage escalier",r7:"🚗 Garage",r8:"🌿 Terrasse",r9:"📦 Débarras",r10:"⚡ Tableau",
+  lampaIP66:"Luminaire IP66 extérieur",lampaDetect:"Luminaire avec détecteur",
+  detectorFumAp:"Détecteur fumée en saillie",detectorFumInc:"Détecteur fumée encastré",
+  detectorCO:"Détecteur CO",baes:"Bloc BAES urgence",
+  impGen:"Mise à la terre générale",impApa:"Liaison équipotentielle eau",impGaz:"Liaison équipotentielle gaz",
+  impPompa:"Liaison équipotentielle PAC",
+  tablou:"Tableau électrique complet",planUnifilar:"Plan unifilaire",
+  cab3g15:"Câble 3G1,5mm (m)",cab3g25:"Câble 3G2,5mm (m)",
+  cab5g15:"Câble 5G1,5mm (m)",cab5g25:"Câble 5G2,5mm (m)",
+  cab2x10:"Câble 2x10mm (m)",cab4x10:"Câble 4x10mm (m)",
+  cabInternet:"Câble data UTP Cat6 (m)",cabDetFum:"Câble XGSOH FE180 (m)",
+  cabTerra16:"Câble de terre 16mm (m)",cabTerra6:"Câble de terre 6mm (m)",
+  cabParl:"Câble parlophone (m)",
+  tub16:"Tubage IRL 16mm (m)",tub20:"Tubage IRL 20mm (m)",
+  tub25:"Tubage IRL 25mm (m)",tub32:"Tubage IRL 32mm (m)",
+  tubFlex16:"Tubage flexible 16mm (m)",tubFlex20:"Tubage flexible 20mm (m)",
+  tubSub40:"Tube enterré EVPC 40mm (m)",tubSub63:"Tube enterré EVPC 63mm (m)",
+  tragCablu:"Tirage câble tube existant (m)",
+  doza:"Boîte de dérivation",dozaIP55:"Boîte dérivation IP55",tubSolar:"Tube vide panneaux solaires (m)",
+  camera:"Caméra surveillance IP",parlofon:"Parlophone vidéo",
+  prizaParl:"Prise parlophone",alimentPompa:"Alimentation pompe à chaleur",extractorBaie:"Extracteur salle de bain",
+  saigneeCaramida:"Saignée en brique (m)",saigneeBeton:"Saignée en béton (m)",
+  r0:"Salon",r1:"Chambre",r2:"Cuisine",r3:"Salle de bain",r4:"WC",
+  r5:"Hall",r6:"Cage escalier",r7:"Garage",r8:"Terrasse",r9:"Cave",r10:"Tableau",
 },
 nl:{
-  firm_card:"🏢 Bedrijf",client_card:"👤 Klant",
+  firm_card:"Bedrijf",client_card:"Klant",
   l_fnume:"Naam bedrijf",l_ftva:"BTW-nummer",l_ftel:"Telefoon",l_faddr:"Adres",
   l_cnume:"Naam klant",l_caddr:"Adres werf",l_ctel:"Telefoon",l_devnr:"Nr. offerte",
   clause_lbl:"Clausule meerwerken",
@@ -596,9 +676,10 @@ nl:{
   add_btn:"+ Toevoegen",room_ph:"Naam van de kamer...",
   empty_txt:"Voeg de eerste kamer toe om te beginnen",
   sum_title:"Overzicht bestek",no_rooms:"Geen kamers toegevoegd",
-  labor_lbl:"🔧 Arbeidsloon (€ excl. BTW)",
+  labor_lbl:"Arbeidsloon (€ excl. BTW)",
   t_mat:"Materialen",t_man:"Arbeidsloon",t_htva:"Subtotaal excl. BTW",t_total:"TOTAAL incl. BTW",
-  pdf_btn:"PDF genereren",reset_btn:"🗑️ Alles wissen",
+  logo_tap:"Tik om logo toe te voegen",logo_choose:"Logo kiezen",logo_del:"Logo verwijderen",logo_hint:"PNG, JPG — verschijnt in PDF",
+  pdf_btn:"PDF genereren",reset_btn:"Alles wissen",
   tab_firm:"Bedrijf",tab_prices:"Prijzen",tab_rooms:"Kamers",tab_sum:"Bestek",
   note_ph:"Opmerking (apart circuit, IP44...)",
   offer_lbl:"OFFERTE / BESTEK",item_desc:"Omschrijving",item_qty:"Stuks",item_up:"Eenheidsprijs",item_tot:"Totaal",
@@ -606,37 +687,110 @@ nl:{
   sig_agree:"Door ondertekening aanvaardt de klant de bovenstaande voorwaarden.",
   clause_title:"Clausule meerwerken",
   priza1:"Enkel stopcontact",priza2:"Dubbel stopcontact",priza3:"Drievoudig stopcontact",priza4:"Viervoudig stopcontact",
-  prizaIP:"Stopcontact IP44 buiten/bad",
+  prizaIP:"Stopcontact IP44 bad/buiten",prizaIP55:"Stopcontact IP55 buiten",prizaIP55d:"Dubbel stopcontact IP55",
+  prizaInternet:"Data stopcontact RJ45",prizaTV:"TV stopcontact coaxiaal",
   plitaMono:"Kookplaat contact 1F",plitaTri3N:"Kookplaat contact 3F+N+PE",plitaTri3:"Kookplaat contact 3F+PE",
   int1:"Enkelvoudige schakelaar",int2:"Dubbele schakelaar",
-  intVV1:"Wisselschakelaar enkel",intVV2:"Wisselschakelaar dubbel",intBip:"Bipolaire schakelaar",
-  variator:"Dimmer",
+  intVV1:"Wisselschakelaar enkel",intVV2:"Wisselschakelaar dubbel",
+  intBip:"Bipolaire schakelaar",variator:"Dimmer",
+  int1IP:"Schakelaar enkel IP55",int2IP:"Schakelaar dubbel IP55",
+  intVV1IP:"Wisselschakelaar IP55",intVV2IP:"Dubbele wisselschakelaar IP55",
   lampa:"Lichtpunt",spot:"Inbouwspot",corpi:"Badkamerlamp IP44",
-  detector:"Rookmelder",detectorCO:"CO-melder",baes:"Noodverlichting BAES",
-  tablou:"Elektrisch bord",disjunctor:"Automaat (stuk)",diferential:"Aardlekschakelaar 30mA",
-  cablVVB15:"Kabel VVB 1,5mm (m)",cablVVB25:"Kabel VVB 2,5mm (m)",cablVVB6:"Kabel VVB 6mm (m)",
-  cablXGSOH:"Kabel XGSOH FE180 (m)",tub16:"Buis IRL 16mm (m)",tub20:"Buis IRL 20mm (m)",
-  tub25:"Buis IRL 25mm (m)",doza:"Aftakdoos",
-  r0:"🛋️ Woonkamer",r1:"🛏️ Slaapkamer",r2:"🍳 Keuken",r3:"🚿 Badkamer",r4:"🚽 WC",
-  r5:"🚪 Gang",r6:"🧱 Trappenhuis",r7:"🚗 Garage",r8:"🌿 Terras",r9:"📦 Berging",r10:"⚡ Schakelkast",
+  lampaIP66:"Buitenlamp IP66",lampaDetect:"Lamp met bewegingsdetector",
+  detectorFumAp:"Rookmelder opbouw",detectorFumInc:"Rookmelder inbouw",
+  detectorCO:"CO-melder",baes:"Noodverlichting BAES",
+  impGen:"Algemene aarding",impApa:"Equipotentiaal water",impGaz:"Equipotentiaal gas",
+  impPompa:"Equipotentiaal warmtepomp",
+  tablou:"Elektrisch bord compleet",planUnifilar:"Eendraadsschema",
+  cab3g15:"Kabel 3G1,5mm (m)",cab3g25:"Kabel 3G2,5mm (m)",
+  cab5g15:"Kabel 5G1,5mm (m)",cab5g25:"Kabel 5G2,5mm (m)",
+  cab2x10:"Kabel 2x10mm (m)",cab4x10:"Kabel 4x10mm (m)",
+  cabInternet:"Datakabel UTP Cat6 (m)",cabDetFum:"Kabel XGSOH FE180 (m)",
+  cabTerra16:"Aardingskabel 16mm (m)",cabTerra6:"Aardingskabel 6mm (m)",
+  cabParl:"Videofoon kabel (m)",
+  tub16:"Buis IRL 16mm (m)",tub20:"Buis IRL 20mm (m)",
+  tub25:"Buis IRL 25mm (m)",tub32:"Buis IRL 32mm (m)",
+  tubFlex16:"Flexibele buis 16mm (m)",tubFlex20:"Flexibele buis 20mm (m)",
+  tubSub40:"Ondergrondse buis EVPC 40mm (m)",tubSub63:"Ondergrondse buis EVPC 63mm (m)",
+  tragCablu:"Kabel trekken door bestaande buis (m)",
+  doza:"Aftakdoos",dozaIP55:"Aftakdoos IP55",tubSolar:"Lege buis zonnepanelen (m)",
+  camera:"IP-bewakingscamera",parlofon:"Videofoon",
+  prizaParl:"Videofoon stopcontact",alimentPompa:"Voeding warmtepomp",extractorBaie:"Badkamer ventilator",
+  saigneeCaramida:"Sleuf in baksteen (m)",saigneeBeton:"Sleuf in beton (m)",
+  r0:"Woonkamer",r1:"Slaapkamer",r2:"Keuken",r3:"Badkamer",r4:"WC",
+  r5:"Gang",r6:"Trappenhuis",r7:"Garage",r8:"Terras",r9:"Kelder",r10:"Schakelkast",
 }};
 
-// ── ITEMS ─────────────────────────────────────────────────
+// ── ITEMS (63 elements) ───────────────────────────────────
 const ITEMS=[
-  {k:'priza1',e:'🔌',p:35},{k:'priza2',e:'🔌🔌',p:45},
-  {k:'priza3',e:'🔌✕3',p:55},{k:'priza4',e:'🔌✕4',p:65},
-  {k:'prizaIP',e:'🌧️',p:58},
-  {k:'plitaMono',e:'🍳1F',p:45},{k:'plitaTri3N',e:'🍳3F+N',p:55},{k:'plitaTri3',e:'🍳3F',p:50},
-  {k:'int1',e:'💡',p:28},{k:'int2',e:'💡💡',p:38},
-  {k:'intVV1',e:'↕️',p:32},{k:'intVV2',e:'↕️↕️',p:45},
-  {k:'intBip',e:'⊞',p:42},{k:'variator',e:'🔆',p:65},
-  {k:'lampa',e:'💡',p:38},{k:'spot',e:'✨',p:45},{k:'corpi',e:'🚿',p:70},
-  {k:'detector',e:'🔴',p:80},{k:'detectorCO',e:'🟠',p:90},{k:'baes',e:'🟢',p:120},
-  {k:'tablou',e:'⚡',p:350},{k:'disjunctor',e:'🔲',p:18},{k:'diferential',e:'🛡️',p:85},
-  {k:'cablVVB15',e:'〰️',p:1.8},{k:'cablVVB25',e:'〰️',p:2.4},{k:'cablVVB6',e:'〰️',p:4.2},
-  {k:'cablXGSOH',e:'🔥',p:3.5},
-  {k:'tub16',e:'⬜',p:0.9},{k:'tub20',e:'⬜',p:1.2},{k:'tub25',e:'⬜',p:1.5},
-  {k:'doza',e:'📦',p:8},
+  // PRIZE
+  {k:'priza1',e:'[P1]',p:35},{k:'priza2',e:'[P2]',p:45},
+  {k:'priza3',e:'[P3]',p:55},{k:'priza4',e:'[P4]',p:65},
+  {k:'prizaIP',e:'[IP44]',p:58},{k:'prizaIP55',e:'[IP55]',p:68},
+  {k:'prizaIP55d',e:'[IP55x2]',p:78},
+  {k:'prizaInternet',e:'[RJ45]',p:45},{k:'prizaTV',e:'[TV]',p:40},
+  // PLITA
+  {k:'plitaMono',e:'[PL1F]',p:45},{k:'plitaTri3N',e:'[PL3F+N]',p:55},{k:'plitaTri3',e:'[PL3F]',p:50},
+  // INTRERUPATOARE NORMAL
+  {k:'int1',e:'[I1]',p:28},{k:'int2',e:'[I2]',p:38},
+  {k:'intVV1',e:'[VV1]',p:32},{k:'intVV2',e:'[VV2]',p:45},
+  {k:'intBip',e:'[BP]',p:42},{k:'variator',e:'[DIM]',p:65},
+  // INTRERUPATOARE IP55
+  {k:'int1IP',e:'[I1-55]',p:45},{k:'int2IP',e:'[I2-55]',p:58},
+  {k:'intVV1IP',e:'[VV1-55]',p:50},{k:'intVV2IP',e:'[VV2-55]',p:65},
+  // ILUMINAT
+  {k:'lampa',e:'[LUM]',p:38},{k:'spot',e:'[SPT]',p:45},
+  {k:'corpi',e:'[IP44]',p:70},{k:'lampaIP66',e:'[IP66]',p:90},
+  {k:'lampaDetect',e:'[LDET]',p:110},
+  // DETECTOARE
+  {k:'detectorFumAp',e:'[FUMA]',p:80},{k:'detectorFumInc',e:'[FUMI]',p:95},
+  {k:'detectorCO',e:'[CO]',p:90},{k:'baes',e:'[BAES]',p:120},
+  // IMPAMANTARE
+  {k:'impGen',e:'[TG]',p:45},{k:'impApa',e:'[TA]',p:35},
+  {k:'impGaz',e:'[TGA]',p:35},{k:'impPompa',e:'[TP]',p:35},
+  // TABLOU
+  {k:'tablou',e:'[TAB]',p:350},{k:'planUnifilar',e:'[PLN]',p:150},
+  // CABLURI
+  {k:'cab3g15',e:'[C]',p:1.8},{k:'cab3g25',e:'[C]',p:2.4},
+  {k:'cab5g15',e:'[C]',p:2.2},{k:'cab5g25',e:'[C]',p:3.2},
+  {k:'cab2x10',e:'[C]',p:5.5},{k:'cab4x10',e:'[C]',p:8.5},
+  {k:'cabInternet',e:'[NET]',p:1.5},{k:'cabDetFum',e:'[FE180]',p:3.5},
+  {k:'cabTerra16',e:'[T16]',p:4.5},{k:'cabTerra6',e:'[T6]',p:2.8},
+  {k:'cabParl',e:'[PAR]',p:1.2},
+  // TUBAJ
+  {k:'tub16',e:'[T16]',p:0.9},{k:'tub20',e:'[T20]',p:1.2},
+  {k:'tub25',e:'[T25]',p:1.5},{k:'tub32',e:'[T32]',p:2.0},
+  {k:'tubFlex16',e:'[TF16]',p:0.8},{k:'tubFlex20',e:'[TF20]',p:1.0},
+  {k:'tubSub40',e:'[TS40]',p:3.5},{k:'tubSub63',e:'[TS63]',p:5.0},
+  {k:'tragCablu',e:'[TR]',p:0.5},
+  {k:'doza',e:'[DOZ]',p:8},{k:'dozaIP55',e:'[DOZ55]',p:14},
+  {k:'tubSolar',e:'[SOL]',p:2.5},
+  // SISTEME SPECIALE
+  {k:'camera',e:'[CAM]',p:180},{k:'parlofon',e:'[PAR]',p:250},
+  {k:'prizaParl',e:'[PP]',p:35},{k:'alimentPompa',e:'[AP]',p:120},
+  {k:'extractorBaie',e:'[EX]',p:85},
+  // LUCRARI
+  {k:'saigneeCaramida',e:'[SC]',p:8},{k:'saigneeBeton',e:'[SB]',p:15},
+];
+
+// Camere predefinite cu traduceri in 3 limbi
+const PRESET_ROOMS = [
+  {ro:'CH 1', fr:'CH 1', nl:'SK 1', e:'🛏️'},
+  {ro:'CH 2', fr:'CH 2', nl:'SK 2', e:'🛏️'},
+  {ro:'CH 3', fr:'CH 3', nl:'SK 3', e:'🛏️'},
+  {ro:'Salon', fr:'Salon', nl:'Woonkamer', e:'🛋️'},
+  {ro:'Hol', fr:'Hall', nl:'Gang', e:'🚪'},
+  {ro:'WC', fr:'WC', nl:'WC', e:'🚽'},
+  {ro:'Bucatarie', fr:'Cuisine', nl:'Keuken', e:'🍳'},
+  {ro:'Sala de masa', fr:'Salle à manger', nl:'Eetkamer', e:'🍽️'},
+  {ro:'Baie', fr:'Salle de bain', nl:'Badkamer', e:'🚿'},
+  {ro:'Camera tehnica', fr:'Local technique', nl:'Technische ruimte', e:'⚙️'},
+  {ro:'Garaj', fr:'Garage', nl:'Garage', e:'🚗'},
+  {ro:'Cava / Subsol', fr:'Cave / Sous-sol', nl:'Kelder', e:'📦'},
+  {ro:'Exterior', fr:'Extérieur', nl:'Buiten', e:'🌿'},
+  {ro:'Birou', fr:'Bureau', nl:'Bureau', e:'🏢'},
+  {ro:'Hol scara', fr:'Cage escalier', nl:'Trappenhuis', e:'🧱'},
+  {ro:'Terasa', fr:'Terrasse', nl:'Terras', e:'☀️'},
 ];
 
 const ROOM_NAMES=['r0','r1','r2','r3','r4','r5','r6','r7','r8','r9','r10'];
@@ -655,6 +809,7 @@ function init(){
   document.getElementById('sumDate').textContent=new Date().toLocaleDateString('fr-BE');
   document.getElementById('clausaText').value=T.ro.p_clauza;
   renderPrices();
+  renderPresets();
   recalc();
 }
 
@@ -673,14 +828,12 @@ function setLang(l){
     const k=el.getAttribute('data-ph');
     if(T[l][k]!==undefined) el.placeholder=T[l][k];
   });
-  // update room select
-  const sel=document.getElementById('roomTypeSelect');
-  ROOM_EMOJIS.forEach((e,i)=>{ sel.options[i].textContent=e; });
   // update clause if default
   const ct=document.getElementById('clausaText');
   const defaults=[T.ro.p_clauza,T.fr.p_clauza,T.nl.p_clauza];
   if(!ct.value||defaults.includes(ct.value)) ct.value=T[l].p_clauza;
   renderPrices();
+  renderPresets();
   renderRooms();
   updateSum();
 }
@@ -709,20 +862,73 @@ function renderPrices(){
     </div>`).join('');
 }
 
+// ── LOGO ──────────────────────────────────────────────────
+let logoBase64 = null;
+
+function loadLogo(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    logoBase64 = e.target.result;
+    const img = document.getElementById('logoImg');
+    const placeholder = document.getElementById('logoPlaceholder');
+    img.src = logoBase64;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    document.getElementById('logoDelBtn').style.display = 'block';
+    document.getElementById('logoPreview').style.borderStyle = 'solid';
+    document.getElementById('logoPreview').style.borderColor = 'var(--yellow)';
+    toast('Logo adaugat!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function deleteLogo(){
+  logoBase64 = null;
+  const img = document.getElementById('logoImg');
+  const placeholder = document.getElementById('logoPlaceholder');
+  img.style.display = 'none';
+  img.src = '';
+  placeholder.style.display = 'flex';
+  document.getElementById('logoDelBtn').style.display = 'none';
+  document.getElementById('logoPreview').style.borderStyle = 'dashed';
+  document.getElementById('logoPreview').style.borderColor = 'var(--g3)';
+  document.getElementById('logoInput').value = '';
+  toast('Logo sters');
+}
+
+// ── PRESET ROOMS ──────────────────────────────────────────
+function renderPresets(){
+  const grid = document.getElementById('presetGrid');
+  if(!grid) return;
+  grid.innerHTML = PRESET_ROOMS.map((r,i) => `
+    <button class="btn-preset" onclick="addPresetRoom(${i})">
+      ${r.e} ${r[lang]||r.ro}
+    </button>`).join('');
+}
+
+function addPresetRoom(idx){
+  const preset = PRESET_ROOMS[idx];
+  const name = preset[lang] || preset.ro;
+  const room = {id:Date.now(), name, emoji:preset.e, items:{}, note:''};
+  ITEMS.forEach(i=>room.items[i.k]=0);
+  rooms.push(room);
+  renderRooms(); recalc();
+  toast('+ '+name);
+}
+
 // ── ROOMS ─────────────────────────────────────────────────
 function addRoom(){
   const inp=document.getElementById('roomInp');
-  const sel=document.getElementById('roomTypeSelect');
-  const emoji=sel.value;
-  const eidx=ROOM_EMOJIS.indexOf(emoji);
-  const name=inp.value.trim()||(eidx>=0?T[lang][ROOM_NAMES[eidx]]||emoji:emoji);
-  const room={id:Date.now(),name,emoji,items:{},note:''};
+  const name=inp.value.trim();
+  if(!name){ toast('Scrie numele camerei!'); return; }
+  const room={id:Date.now(),name,emoji:'🏠',items:{},note:''};
   ITEMS.forEach(i=>room.items[i.k]=0);
   rooms.push(room);
   inp.value='';
-  renderRooms();
-  recalc();
-  toast(T[lang].add_btn||'+ Add');
+  renderRooms(); recalc();
+  toast('+ '+name);
 }
 
 function removeRoom(id){
@@ -920,13 +1126,28 @@ function makePDF(){
   fillRect(0,0,W,28,navy);
   fillRect(0,28,W,1.5,yellow);
 
-  // lightning bolt
-  setFont(18,'bold',yellow);
-  text('⚡',ML,20);
-
-  // firm name
-  setFont(14,'bold',white);
-  text(firmNume,ML+12,16);
+  // Logo sau patrat ELG
+  if(logoBase64){
+    try{
+      // detectam tipul imaginii
+      const imgType = logoBase64.includes('image/png')?'PNG':
+                      logoBase64.includes('image/jpeg')||logoBase64.includes('image/jpg')?'JPEG':'PNG';
+      doc.addImage(logoBase64, imgType, ML, 4, 20, 18);
+    }catch(e){
+      // fallback daca imaginea nu merge
+      fillRect(ML, 6, 14, 14, yellow);
+      setFont(9,'bold',navy);
+      text('ELG', ML+1, 15);
+    }
+    setFont(14,'bold',white);
+    text(firmNume, ML+24, 16);
+  } else {
+    fillRect(ML, 6, 14, 14, yellow);
+    setFont(9,'bold',navy);
+    text('ELG', ML+1, 15);
+    setFont(14,'bold',white);
+    text(firmNume, ML+18, 16);
+  }
 
   // firm details small
   setFont(8,'normal',[180,190,200]);
